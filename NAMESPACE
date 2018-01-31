@@ -1,1 +1,6 @@
+import(arules)
+
+export(CELLector.Build_Search_Space)
+export(CELLetor.mostSupported_CFEs)
 exportPattern("^[[:alpha:]]+")
+
