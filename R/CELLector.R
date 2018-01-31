@@ -14,5 +14,10 @@
 #   Test Package:              'Cmd + Shift + T'
 
 hello <- function() {
-  print("Hello, world!")
+  print("Ciao, Mondo!")
+}
+
+
+hello2 <- function() {
+  print("is it me you are looking for?")
 }
