@@ -1,6 +1,6 @@
 
 ## Exported functions
-CELLector.Build_Search_Space<-function(tumours,
+CELLector.Build_Search_Space<-function(ctumours,
                                  cancerType,
                                  minlen=1,
                                  verbose=TRUE,
@@ -8,10 +8,38 @@ CELLector.Build_Search_Space<-function(tumours,
                                  cnaOnly=FALSE,
                                  minGlobSupp=0.01,
                                  FeatureToExclude=NULL,
-                                 pathwayFocused=NULL){
+                                 pathway_CFEs = NULL,
+                                 pathwayFocused=NULL,
+                                 subCohortDefinition=NULL,
+                                 NegativeDefinition=FALSE,
+                                 cnaIdMap,
+                                 cnaIdDecode,
+                                 cdg){
 
-  tumours<-t(tumors)
+
+  rownames(ctumours)<-paste(rownames(ctumours),'_',1:nrow(ctumours),sep='')
+
+  PANcna_KEY<-cnaIdMap
+  cnaKEY16<-cnaIdDecode
+
+
+  if(length(FeatureToExclude)>0){
+    ctumours<-ctumours[,setdiff(colnames(ctumours),FeatureToExclude)]
+  }
+
+  if(length(subCohortDefinition)>0){
+    if(is.element(subCohortDefinition,colnames(ctumours))){
+      if(NegativeDefinition){
+        ctumours<-ctumours[which(ctumours[,subCohortDefinition]==0),]
+      }else{
+        ctumours<-ctumours[which(ctumours[,subCohortDefinition]==1),]
+      }
+    }
+  }
+
+
   if (length(pathwayFocused)>0){
+    miniPathways<-pathway_CFEs
     events<-unique(unlist(miniPathways[pathwayFocused]))
 
     ii<-grep('cnaPANCA',events)
@@ -26,24 +54,21 @@ CELLector.Build_Search_Space<-function(tumours,
 
     events<-c(events[-ii],cnaCS)
 
-    tumours<-tumours[,intersect(colnames(tumours),events)]
+    ctumours<-ctumours[,intersect(colnames(ctumours),events)]
   }
 
-  if(length(FeatureToExclude)>0){
-    tumours<-tumours[,setdiff(colnames(tumours),FeatureToExclude)]
-  }
 
   if(mutOnly){
     if(cnaOnly){
       stop("only one between mutOnly and cnaOnly can be TRUE", call. = FALSE)
     }
-    tumours<-tumours[,setdiff(colnames(tumours),grep('cna',colnames(tumours),value=TRUE))]
+    ctumours<-ctumours[,setdiff(colnames(ctumours),grep('cna',colnames(ctumours),value=TRUE))]
   }
   if(cnaOnly){
     if(mutOnly){
       stop("only one between mutOnly and cnaOnly can be TRUE", call. = FALSE)
     }
-    tumours<-tumours[,grep('cna',colnames(tumours),value=TRUE)]
+    ctumours<-ctumours[,grep('cna',colnames(ctumours),value=TRUE)]
   }
 
 
@@ -51,18 +76,18 @@ CELLector.Build_Search_Space<-function(tumours,
   SysTREE<-NULL
 
   ROOT<-createNode(SystemStack = SysST,
-                   transactions = tumours,
-                   currentPoints = 1:nrow(tumours),
-                   currentFeatures = colnames(tumours),
+                   transactions = ctumours,
+                   currentPoints = rownames(ctumours),
+                   currentFeatures = colnames(ctumours),
                    Type='root',
                    Parent.Idx=0,
                    maxId = 0,
                    ctype = cancerType,
                    minlen = minlen,
-                   globalSupport = minGlobSupp)
+                   globalSupport = minGlobSupp,
+                   cnaId_decode = cnaIdDecode)
 
   if(length(ROOT)>0){
-
 
     nROOT <- Node$new(paste(ROOT$Idx,paste(ROOT$decodedIS,collapse=', ')))
 
@@ -74,7 +99,6 @@ CELLector.Build_Search_Space<-function(tumours,
     if(verbose){
       print(paste('adding root node:',paste(ROOT$decodedIS,collapse=', ')))
     }
-
 
     MD<- -Inf
 
@@ -95,7 +119,7 @@ CELLector.Build_Search_Space<-function(tumours,
 
 
       RIGHTCHILD<-createNode(SystemStack = SysST,
-                             transactions = tumours,
+                             transactions = ctumours,
                              currentPoints = setdiff(currentNode$currentPoints,currentNode$positivePoints),
                              currentFeatures = setdiff(currentNode$currentFeatures,currentNode$ItemSet),
                              Type='Right.Child',
@@ -103,7 +127,8 @@ CELLector.Build_Search_Space<-function(tumours,
                              maxId=MD,
                              ctype = cancerType,
                              minlen=minlen,
-                             globalSupport = minGlobSupp)
+                             globalSupport = minGlobSupp,
+                             cnaId_decode = cnaIdDecode)
 
       if(length(RIGHTCHILD)>0){
 
@@ -124,7 +149,7 @@ CELLector.Build_Search_Space<-function(tumours,
       }
 
       LEFTCHILD<-createNode(SystemStack = SysST,
-                            transactions = tumours,
+                            transactions = ctumours,
                             currentPoints = currentNode$positivePoints,
                             currentFeatures = setdiff(currentNode$currentFeatures,currentNode$ItemSet),
                             Type='Left.Child',
@@ -132,7 +157,8 @@ CELLector.Build_Search_Space<-function(tumours,
                             maxId=MD,
                             ctype = cancerType,
                             minlen=minlen,
-                            globalSupport = minGlobSupp)
+                            globalSupport = minGlobSupp,
+                            cnaId_decode = cnaIdDecode)
 
       if(length(LEFTCHILD)>0){
         if(verbose){
@@ -148,14 +174,10 @@ CELLector.Build_Search_Space<-function(tumours,
       }
     }
 
-
-
     tmp<-unlist(str_split(Get(Traverse(nROOT,'pre-order'),'name'),' '))
-
 
     suppressWarnings(pre_orderVisit<-as.numeric(tmp)[!is.na(as.numeric(tmp))])
 
-    #pre_orderVisit<-as.numeric(tmp[seq(1,length(tmp),2)])
     globalSuppAttrb<-round(100*NT$GlobalSupport[match(pre_orderVisit,NT$Idx)],digits = 2)
     nodeTypeAttrb<-as.character(NT$Type[match(pre_orderVisit,NT$Idx)])
 
@@ -165,12 +187,11 @@ CELLector.Build_Search_Space<-function(tumours,
     NT<-matrix(1)
     nROOT<-NULL
   }
-
+  print('il cazzo')
   return(list(navTable=NT,TreeRoot=nROOT))
 }
 
-CELLetor.mostSupported_CFEs<-function(transactions,minSupport=0.05,minlen=1,maxLen=10){
-  transactions<-t(transactions)
+CELLector.mostSupported_CFEs<-function(transactions,minSupport=0.05,minlen=1,maxLen=10){
   res<-eclat(transactions,parameter=list(supp=minSupport,minlen=minlen,maxlen=maxLen),control=list(verbose=F))
 
   if(length(res)>0){
@@ -194,6 +215,27 @@ CELLetor.mostSupported_CFEs<-function(transactions,minSupport=0.05,minlen=1,maxL
   RES<-list(MSIS=mostSI,SUPPORT=support,absSUPPORT=absSupport,supportingSamples=SP)
   return(RES)
 }
+CELLector.cna_look_up <- function(cna_ID, cnaId_decode, TCGALabel) {
+
+  cnaKEY16<-cnaId_decode
+  CancerSpecificData <- cnaKEY16 %>% filter(CancerType == paste(TCGALabel))
+
+  if (length(cna_ID) == 1) {
+
+    info <- CancerSpecificData %>% filter(CNA_Identifier == paste0(cna_ID)) %>% select(Identifier, Recurrent, chr, start, stop,
+                                                                                       locus, nGenes, ContainedGenes)
+
+
+  } else if (length(cna_ID) > 1) {
+
+    info <- CancerSpecificData %>% filter(CNA_Identifier %in% cna_ID) %>% select(Identifier, Recurrent, chr, start, stop, locus,
+                                                                                 nGenes, ContainedGenes)
+
+  }
+
+  return(info)
+
+}
 
 ## not Exported functions
 createNode<-function(SystemStack,
@@ -204,12 +246,15 @@ createNode<-function(SystemStack,
                      Type,
                      Parent.Idx,maxId,
                      globalSupport=0.02,
-                     minlen=1,ctype){
+                     minlen=1,ctype,
+                     cnaId_decode,
+                     cdg=NULL){
 
   nodeIdx<-maxId+1
 
   if(length(currentFeatures)==1){
-    currentDataset<-matrix(transactions[currentPoints,currentFeatures],length(currentPoints),1,dimnames = list(currentPoints,currentFeatures))
+    currentDataset<-matrix(transactions[currentPoints,currentFeatures],
+                           length(currentPoints),1,dimnames = list(currentPoints,currentFeatures))
   }else{
     currentDataset<-transactions[currentPoints,currentFeatures]
   }
@@ -221,7 +266,7 @@ createNode<-function(SystemStack,
 
   if(minSupport<1 & sum(unlist(c(currentDataset)))>0){
 
-    RES<-mostSupportedItemSet(transactions = currentDataset,
+    RES<-CELLector.mostSupported_CFEs(transactions = currentDataset,
                               minSupport = minSupport,
                               minlen = minlen)
 
@@ -232,7 +277,7 @@ createNode<-function(SystemStack,
 
       IS<-RES$MSIS
 
-      dIS<-decodeCNAs(ctype = ctype,codedCNA = IS)
+      dIS<-decodeCNAs(ctype = ctype,codedCNA = IS, cnaId_decode = cnaId_decode, cdg = cdg)
 
       if(length(IS)==1){
         gs<-sum(transactions[,IS])/nrow(transactions)
@@ -243,7 +288,7 @@ createNode<-function(SystemStack,
       nNODE<-
         list(Idx=nodeIdx,
              currentPoints=currentPoints,
-             positivePoints=RES$supportingPoints,
+             positivePoints=RES$supportingSamples,
              currentFeatures=currentFeatures,
              ItemSet=RES$MSIS,
              decodedIS=dIS,
@@ -261,7 +306,111 @@ createNode<-function(SystemStack,
   }
 }
 
+decodeCNAs<-function(ctype,codedCNA,cnaId_decode,cdg){
+  IS<-codedCNA
+  icna<-grep('cna',IS)
 
+  #if(length(icna)>0){
+
+  noncna<-setdiff(1:length(IS),icna)
+
+
+  if (length(icna)>0){
+
+
+    cnalu<-CELLector.cna_look_up(IS[icna],TCGALabel = ctype,cnaId_decode = cnaId_decode)
+
+    altType<-cnalu$Recurrent
+    AT<-rep(NA,length(altType))
+    AT[which(as.character(altType)=='Amplification')]<-'G'
+    AT[which(as.character(altType)=='Deletion')]<-'L'
+
+    loci<-as.character(cnalu$locus)
+    genes<-as.character(cnalu$ContainedGenes)
+
+    for (i in 1:length(genes)){
+      cgenes<-unlist(str_split(genes[i],','))
+      if (length(cgenes)>5){
+        cgenes<-intersect(cgenes,cdg)
+        cgenes<-paste(paste(cgenes,collapse=','),'...',sep='')
+      }else{
+        cgenes<-genes[i]
+      }
+      genes[i]<-cgenes
+    }
+
+
+    IS[icna]<-paste(AT,loci,'(',genes,')',sep='')}
+
+  IS[noncna]<-paste(IS[noncna],'mut',sep='')
+  #}
+  return(IS)
+}
+
+stackPush<-function(SystemStack,node){
+  currentLength<-length(SystemStack)
+  if(currentLength>0){
+    SystemStack[currentLength+1]<-list(node)
+  }else{
+    SystemStack<-list(node)
+  }
+  return(SystemStack)
+}
+stackTop<-function(SystemStack){
+  return(SystemStack[[length(SystemStack)]])
+}
+stackPop<-function(SystemStack){
+
+  if(length(SystemStack)>0){
+    nNode<-SystemStack[[length(SystemStack)]]
+
+    if(length(SystemStack)>1){
+      SystemStack<-SystemStack[1:(length(SystemStack)-1)]
+    }else{
+      SystemStack<-NULL
+    }
+  }
+
+  return(list(nNode=nNode,SYST=SystemStack))
+}
+
+addNodeToNavTable<-function(NavTable,node){
+    if(length(NavTable)==0){
+      NavTable<-data.frame(c(node[1],paste(node[[5]],collapse=', '),paste(node[[6]],collapse=', '),node[7:12],
+                             0,0,paste(node[[2]],collapse=','),paste(node[[4]],collapse=','),paste(node[[3]],collapse=',')))
+      colnames(NavTable)[2]<-'Items'
+      colnames(NavTable)[3]<-'ItemsDecoded'
+      colnames(NavTable)[10]<-'Left.Child.Index'
+      colnames(NavTable)[11]<-'Right.Child.Index'
+      colnames(NavTable)[12]<-'currentPoints'
+      colnames(NavTable)[13]<-'currentFeatures'
+      colnames(NavTable)[14]<-'positivePoints'
+
+    }else{
+      newChunk<-data.frame(c(node[1],paste(node[[5]],collapse=', '),paste(node[[6]],collapse=', '),node[7:12],
+                             0,0,paste(node[[2]],collapse=','),paste(node[[4]],collapse=','),paste(node[[3]],collapse=',')))
+
+      colnames(newChunk)[2]<-'Items'
+      colnames(newChunk)[3]<-'ItemsDecoded'
+      colnames(newChunk)[10]<-'Left.Child.Index'
+      colnames(newChunk)[11]<-'Right.Child.Index'
+      colnames(newChunk)[12]<-'currentPoints'
+      colnames(newChunk)[13]<-'currentFeatures'
+      colnames(newChunk)[14]<-'positivePoints'
+
+      NavTable<-rbind(NavTable,newChunk)
+
+      if(node$Type=='Left.Child'){
+        NavTable$Left.Child.Index[which(NavTable$Idx==node$Parent.Idx)]<-node$Idx
+      }
+
+      if(node$Type=='Right.Child'){
+        NavTable$Right.Child.Index[which(NavTable$Idx==node$Parent.Idx)]<-node$Idx
+      }
+    }
+
+    return(NavTable)
+  }
 
 # library(igraph)
 # library(BBmisc)
@@ -271,7 +420,7 @@ createNode<-function(SystemStack,
 # library(data.tree)
 # library(plotly)
 #
-# source('R/cna_look_up.R')
+# source('R/CELLector.cna_look_up.R')
 #
 # cdg<-
 #   union(union(cancerDrivers$ActingDriver_Symbol,InigoList),'MYC')
@@ -376,109 +525,9 @@ createNode<-function(SystemStack,
 # }
 
 #
-# stackPush<-function(SystemStack,node){
-#   currentLength<-length(SystemStack)
-#   if(currentLength>0){
-#     SystemStack[currentLength+1]<-list(node)
-#   }else{
-#     SystemStack<-list(node)
-#   }
-#   return(SystemStack)
-# }
-# stackTop<-function(SystemStack){
-#   return(SystemStack[[length(SystemStack)]])
-# }
-# stackPop<-function(SystemStack){
+
 #
-#   if(length(SystemStack)>0){
-#     nNode<-SystemStack[[length(SystemStack)]]
-#
-#     if(length(SystemStack)>1){
-#       SystemStack<-SystemStack[1:(length(SystemStack)-1)]
-#     }else{
-#       SystemStack<-NULL
-#     }
-#   }
-#
-#   return(list(nNode=nNode,SYST=SystemStack))
-# }
-# addNodeToNavTable<-function(NavTable,node){
-#   if(length(NavTable)==0){
-#     NavTable<-data.frame(c(node[1],paste(node[[5]],collapse=', '),paste(node[[6]],collapse=', '),node[7:12],
-#                            0,0,paste(node[[2]],collapse=','),paste(node[[4]],collapse=','),paste(node[[3]],collapse=',')))
-#     colnames(NavTable)[2]<-'Items'
-#     colnames(NavTable)[3]<-'ItemsDecoded'
-#     colnames(NavTable)[10]<-'Left.Child.Index'
-#     colnames(NavTable)[11]<-'Right.Child.Index'
-#     colnames(NavTable)[12]<-'currentPoints'
-#     colnames(NavTable)[13]<-'currentFeatures'
-#     colnames(NavTable)[14]<-'positivePoints'
-#
-#   }else{
-#     newChunk<-data.frame(c(node[1],paste(node[[5]],collapse=', '),paste(node[[6]],collapse=', '),node[7:12],
-#                            0,0,paste(node[[2]],collapse=','),paste(node[[4]],collapse=','),paste(node[[3]],collapse=',')))
-#
-#     colnames(newChunk)[2]<-'Items'
-#     colnames(newChunk)[3]<-'ItemsDecoded'
-#     colnames(newChunk)[10]<-'Left.Child.Index'
-#     colnames(newChunk)[11]<-'Right.Child.Index'
-#     colnames(newChunk)[12]<-'currentPoints'
-#     colnames(newChunk)[13]<-'currentFeatures'
-#     colnames(newChunk)[14]<-'positivePoints'
-#
-#     NavTable<-rbind(NavTable,newChunk)
-#
-#     if(node$Type=='Left.Child'){
-#       NavTable$Left.Child.Index[which(NavTable$Idx==node$Parent.Idx)]<-node$Idx
-#     }
-#
-#     if(node$Type=='Right.Child'){
-#       NavTable$Right.Child.Index[which(NavTable$Idx==node$Parent.Idx)]<-node$Idx
-#     }
-#   }
-#
-#   return(NavTable)
-# }
-# decodeCNAs<-function(ctype,codedCNA){
-#   IS<-codedCNA
-#   icna<-grep('cna',IS)
-#
-#   #if(length(icna)>0){
-#
-#   noncna<-setdiff(1:length(IS),icna)
-#
-#
-#   if (length(icna)>0){
-#
-#
-#     cnalu<-cna_look_up(IS[icna],TCGALabel = ctype)
-#
-#     altType<-cnalu$Recurrent
-#     AT<-rep(NA,length(altType))
-#     AT[which(as.character(altType)=='Amplification')]<-'G'
-#     AT[which(as.character(altType)=='Deletion')]<-'L'
-#
-#     loci<-as.character(cnalu$locus)
-#     genes<-as.character(cnalu$ContainedGenes)
-#
-#     for (i in 1:length(genes)){
-#       cgenes<-unlist(str_split(genes[i],','))
-#       if (length(cgenes)>5){
-#         cgenes<-intersect(cgenes,cdg)
-#         cgenes<-paste(paste(cgenes,collapse=','),'...',sep='')
-#       }else{
-#         cgenes<-genes[i]
-#       }
-#       genes[i]<-cgenes
-#     }
-#
-#
-#     IS[icna]<-paste(AT,loci,'(',genes,')',sep='')}
-#
-#   IS[noncna]<-paste(IS[noncna],'mut',sep='')
-#   #}
-#   return(IS)
-# }
+
 #
 # selectionVisit<-function(TAV){
 #   reducedTab<-TAV[,c(1,4,5,10,11)]
