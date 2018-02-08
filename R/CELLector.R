@@ -189,9 +189,12 @@ CELLector.Build_Search_Space<-function(ctumours,
     NT<-matrix(1)
     nROOT<-NULL
   }
-  print('il cazzo')
+
   return(list(navTable=NT,TreeRoot=nROOT))
 }
+
+
+
 
 CELLector.mostSupported_CFEs<-function(transactions,minSupport=0.05,minlen=1,maxLen=10){
   res<-eclat(transactions,parameter=list(supp=minSupport,minlen=minlen,maxlen=maxLen),control=list(verbose=F))

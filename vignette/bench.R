@@ -1,12 +1,13 @@
 #library(CELLector)
 
+library(sunburstR)
+
 data(CELLector.PrimTum.BEMs)
 data(CELLector.Pathway_CFEs)
 data(CELLector.CFEs.CNAid_mapping)
 data(CELLector.CFEs.CNAid_decode)
 data(CELLector.HCCancerDrivers)
 
-data(CELLector.PathwayList)
 
 tumours_BEM<-CELLector.PrimTum.BEMs$COREAD
 
@@ -24,7 +25,6 @@ tmp<-CELLector.Build_Search_Space(ctumours = t(tumours_BEM),verbose = FALSE,
                              subCohortDefinition='TP53',
                              NegativeDefinition=TRUE)
 
-
 tmp<-CELLector.Build_Search_Space(ctumours = t(tumours_BEM),
                              minGlobSupp = 0.01,
                              cancerType = 'COREAD',
@@ -35,5 +35,16 @@ tmp<-CELLector.Build_Search_Space(ctumours = t(tumours_BEM),
                              cdg = CELLector.HCCancerDrivers,
                              FeatureToExclude = 'TP53')
 
+tmp<-CELLector.sunBurstFormat(tmp$navTable)
 
-CELLector.cna_look_up(cna_ID = "cna52",cnaId_decode = CELLector.CFEs.CNAid_decode,TCGALabel = 'COREAD')
+sb<-sunburst(tmp$sequences,colors = tmp$colors,breadcrumb = list(w = 100),percent = FALSE,count = FALSE,
+             explanation = "function(d) { return d.data.name}")
+
+sb$x$tasks <- htmlwidgets::JS(
+  'function(){d3.select(this.el).select("#" + this.el.id + "-trail").style("font-size","60%")}'
+)
+
+sb
+
+
+
