@@ -2,6 +2,64 @@
 # testing the new repo
 
 ## Exported functions
+
+CELLector.solveFormula<-function(RULE,dataset){
+
+  tdataset<-dataset[,3:ncol(dataset)]
+  rownames(tdataset)<-dataset[,2]
+
+  tokenize<-unlist(str_split(RULE,' '))
+  tokenize<-tokenize[tokenize!='']
+
+  NegVar<-grep('~',tokenize)
+  PosVar<-setdiff(1:length(tokenize),NegVar)
+  ortok<-tokenize
+  tokenize<-str_replace(tokenize,'~','')
+
+  tdataset<-t(tdataset)
+
+  notPresentPosVar<-setdiff(tokenize[PosVar],rownames(tdataset))
+  notPresentNegVar<-setdiff(tokenize[NegVar],rownames(tdataset))
+
+  if(length(notPresentNegVar)){
+
+    toAdd<-matrix(0,length(notPresentNegVar),ncol(tdataset),dimnames = list(notPresentNegVar,colnames(tdataset)))
+    tdataset<-rbind(tdataset,toAdd)
+
+  }
+
+  if(length(notPresentPosVar)==0){
+    tdataset<-rbind(tdataset[tokenize[PosVar],],1-tdataset[tokenize[NegVar],])
+    rownames(tdataset)<-c(ortok[PosVar],ortok[NegVar])
+
+    positiveSamples<-names(which(colSums(tdataset)==length(ortok)))
+    nsamples<-length(positiveSamples)
+    frac<-nsamples/nrow(dataset)
+
+    return(list(PS=positiveSamples,N=nsamples,PERC=frac))
+  }else{
+    return(NULL)
+  }
+
+}
+
+CELLector.createAllSignatures<-function(NavTab){
+    NN<-NavTab$Idx
+
+    signatures<-vector()
+    encodedsignatures<-vector()
+
+    for (i in 1:length(NN)){
+      S<-createRuleFromNode(NavTab,NN[i])
+      signatures[i]<-S$S
+      encodedsignatures[i]<-S$ES
+      }
+
+    names(signatures)<-NN
+    names(encodedsignatures)<-NN
+    return(list(S=signatures,ES=encodedsignatures))
+    }
+
 CELLector.Build_Search_Space<-function(ctumours,
                                  cancerType,
                                  minlen=1,
@@ -192,10 +250,6 @@ CELLector.Build_Search_Space<-function(ctumours,
 
   return(list(navTable=NT,TreeRoot=nROOT))
 }
-
-
-
-
 CELLector.mostSupported_CFEs<-function(transactions,minSupport=0.05,minlen=1,maxLen=10){
   res<-eclat(transactions,parameter=list(supp=minSupport,minlen=minlen,maxlen=maxLen),control=list(verbose=F))
 
@@ -243,6 +297,43 @@ CELLector.cna_look_up <- function(cna_ID, cnaId_decode, TCGALabel) {
 }
 
 ## not Exported functions
+createRuleFromNode<-function(NavTab,nodeIdx){
+
+  RULES<-list()
+
+  pos<-match(nodeIdx,NavTab$Idx)
+  orpos<-pos
+
+  SIGNATURE<-''
+  encodedSIGNATURE<-''
+
+  while(pos>0){
+
+    currentType<-NavTab$Type[pos]
+
+    pos<-NavTab$Parent.Idx[pos]
+
+    if(pos>0){
+      if (currentType=='Right.Child'){
+        prefix<-'~'
+      }else{
+        prefix<-''
+      }
+      currentTerm<-paste(prefix,NavTab$ItemsDecoded[pos],sep='')
+      SIGNATURE<-paste(currentTerm,SIGNATURE)
+      EcurrentTerm<-paste(prefix,NavTab$Items[pos],sep='')
+      encodedSIGNATURE<-paste(EcurrentTerm,encodedSIGNATURE)
+    }
+
+  }
+
+  SIGNATURE<-paste(SIGNATURE,NavTab$ItemsDecoded[orpos],sep='')
+  encodedSIGNATURE<-paste(encodedSIGNATURE,NavTab$Items[orpos],sep='')
+
+  SIGNATURE<-str_trim(SIGNATURE)
+  encodedSIGNATURE<-str_trim(encodedSIGNATURE)
+  return(list(S=SIGNATURE,ES=encodedSIGNATURE))
+}
 createNode<-function(SystemStack,
                      transactions,
                      currentPoints,
