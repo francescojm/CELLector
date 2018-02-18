@@ -348,9 +348,10 @@ createNode<-function(SystemStack,
 
   nodeIdx<-maxId+1
 
-  if(length(currentFeatures)==1){
+  if(length(currentFeatures)==1 | length(currentPoints)==1){
     currentDataset<-matrix(transactions[currentPoints,currentFeatures],
-                           length(currentPoints),1,dimnames = list(currentPoints,currentFeatures))
+                           length(currentPoints),length(currentFeatures),
+                           dimnames = list(currentPoints,currentFeatures))
   }else{
     currentDataset<-transactions[currentPoints,currentFeatures]
   }

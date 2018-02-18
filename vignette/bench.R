@@ -1,4 +1,4 @@
-#library(CELLector)
+library(CELLector)
 
 library(sunburstR)
 library(collapsibleTree)
@@ -27,6 +27,15 @@ tmp<-CELLector.Build_Search_Space(ctumours = t(tumours_BEM),
                              cdg = CELLector.HCCancerDrivers,
                              subCohortDefinition='TP53',
                              NegativeDefinition=TRUE)
+
+tmp<-CELLector.Build_Search_Space(ctumours = t(tumours_BEM),
+                                  verbose = TRUE,
+                                  minGlobSupp = 0.01,
+                                  cancerType = 'COREAD',
+                                  pathway_CFEs = CELLector.Pathway_CFEs,
+                                  cnaIdMap = CELLector.CFEs.CNAid_mapping,
+                                  cnaIdDecode = CELLector.CFEs.CNAid_decode,
+                                  cdg = CELLector.HCCancerDrivers)
 
 CELLector.solveFormula('cna27',CELLector.CellLine.BEMs[['COREAD']])
 
