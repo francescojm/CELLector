@@ -92,10 +92,11 @@ CELLector_App.sunBurstFormat<-function(table_tree){
 
 }
 
-#library(CELLector)
 
 library(sunburstR)
+library(igraph)
 library(collapsibleTree)
+
 
 data(CELLector.PrimTum.BEMs)
 data(CELLector.Pathway_CFEs)
@@ -121,6 +122,23 @@ tmp<-CELLector.Build_Search_Space(ctumours = t(tumours_BEM),
                                   cdg = CELLector.HCCancerDrivers,
                                   subCohortDefinition='TP53',
                                   NegativeDefinition=TRUE)
+
+
+tmp<-CELLector.Build_Search_Space(ctumours = t(tumours_BEM),
+                                  verbose = FALSE,
+                                  minGlobSupp = 0.05,
+                                  cancerType = 'COREAD',
+                                  pathwayFocused = c("RAS-RAF-MEK-ERK / JNK signaling",
+                                                     "PI3K-AKT-MTOR signaling","WNT signaling",
+                                                     "TP53 signaling"),
+                                  mutOnly = FALSE,
+                                  pathway_CFEs = CELLector.Pathway_CFEs,
+                                  cnaIdMap = CELLector.CFEs.CNAid_mapping,
+                                  cnaIdDecode = CELLector.CFEs.CNAid_decode,
+                                  cdg = CELLector.HCCancerDrivers,
+                                  subCohortDefinition='TP53',
+                                  NegativeDefinition=FALSE)
+
 
 sb<-CELLector_App.sunBurstFormat(tmp$navTable)
 
@@ -164,7 +182,8 @@ CELLector.createAllSignatures(tmp$navTable)
 tmp<-CELLector.Build_Search_Space(ctumours = t(tumours_BEM),
                                   minGlobSupp = 0.05,
                                   cancerType = 'COREAD',
-                                  pathwayFocused = c("RAS-RAF-MEK-ERK / JNK signaling","PI3K-AKT-MTOR signaling","WNT signaling"),
+                                  pathwayFocused = c("RAS-RAF-MEK-ERK / JNK signaling",
+                                                     "PI3K-AKT-MTOR signaling","WNT signaling"),
                                   pathway_CFEs = CELLector.Pathway_CFEs,
                                   cnaIdMap = CELLector.CFEs.CNAid_mapping,
                                   cnaIdDecode = CELLector.CFEs.CNAid_decode,
@@ -199,13 +218,35 @@ colors <- list(
 )
 
 
-
-
-
-
 sb$x$tasks <- htmlwidgets::JS(
   'function(){d3.select(this.el).select("#" + this.el.id + "-trail").style("font-size","60%")}'
 )
 
 sb
+
+
+
+NT<-list(data=tmp)
+
+currentGlobalSupport <- NT$data$navTable$GlobalSupport[1]
+supportingPatients <- NT$data$navTable$positivePoints[1]
+
+nn <- nrow(t(tumours_BEM))
+patients <- rep(0,nn)
+names(patients) <- rownames(t(tumours_BEM))
+supportingPatients <- unlist(str_split(supportingPatients,','))
+patients[supportingPatients] <- 1
+
+tmpCol <- Get(Traverse(NT$data$TreeRoot,traversal = 'level'),'Colors')
+non <- names(tmpCol)
+non <- str_split(non,' ')
+non <- unlist(lapply(non,function(x){x[[1]][1]}))
+
+id <- which(non==SELECTEDNODE$data)
+
+polar.plot(patients,
+           1:nn, main=paste("SubType ", SELECTEDNODE$data,
+                            ' (', format(100*currentGlobalSupport, digits=3),'% of ', nrow(TUMOURS$data), ' patients)',sep=''),
+           lwd=1, line.col=tmpCol[id],rp.type = 'r', labels=NULL,show.grid=FALSE, show.radial.grid=FALSE, show.grid.labels=FALSE)
+
 

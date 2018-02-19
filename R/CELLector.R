@@ -3,10 +3,11 @@
 
 ## Exported functions
 
-CELLector.solveFormula<-function(RULE,dataset){
+CELLector.solveFormula<-function(RULE,dataset,To_beExcluded=NULL){
 
-  tdataset<-dataset[,3:ncol(dataset)]
-  rownames(tdataset)<-dataset[,2]
+  tdataset<-dataset
+
+  tdataset<-tdataset[setdiff(rownames(tdataset),To_beExcluded),]
 
   tokenize<-unlist(str_split(RULE,' '))
   tokenize<-tokenize[tokenize!='']
@@ -77,7 +78,7 @@ CELLector.Build_Search_Space<-function(ctumours,
                                  cdg){
 
 
-  rownames(ctumours)<-paste(rownames(ctumours),'_',1:nrow(ctumours),sep='')
+ # rownames(ctumours)<-paste(rownames(ctumours),'_',1:nrow(ctumours),sep='')
 
   PANcna_KEY<-cnaIdMap
   cnaKEY16<-cnaIdDecode
