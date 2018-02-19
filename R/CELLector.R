@@ -297,6 +297,123 @@ CELLector.cna_look_up <- function(cna_ID, cnaId_decode, TCGALabel) {
 
 }
 
+CELLector.selectionVisit<-function(TAV){
+  reducedTab<-TAV[,c(1,4,5,10,11)]
+  currentNode<-1
+  pileIdx<-1
+  pile<-currentNode
+  nodeType<-reducedTab[currentNode,2]
+
+  while(pileIdx<=length(pile)){
+
+    #print(pile)
+
+    pile<-c(pile,rightMostPath(reducedTab,pile[pileIdx]))
+    nodeType<-reducedTab[pile,2]
+    #print(pile[pileIdx:length(pile)])
+
+    pile<-c(pile,setdiff(leftChildPattern(reducedTab,pile[(pileIdx):length(pile)]),pile))
+    nodeType<-reducedTab[pile,2]
+
+    # print(pile[pileIdx:length(pile)])
+
+    dd <- which(nodeType=='Left.Child')
+    pileIdx<-dd[dd>pileIdx][1]
+
+    if(is.na(pileIdx)){
+      break
+    }
+  }
+  return(pile)
+}
+CELLector.buildModelMatrix<-function(modellist){
+
+
+  cls_<-list()
+  for (i in 1:length(modellist)){
+
+    cls_[[i]]<-unlist(str_split(modellist[i],', '))
+  }
+
+  mappedCLS<-sort(unique(unlist(cls_)))
+
+  modelMatrix<-matrix(0,length(modellist),length(mappedCLS),dimnames = list(1:length(modellist),mappedCLS))
+
+  for (i in 1:length(modellist)){
+    modelMatrix[i,cls_[[i]]]<-1
+  }
+
+  return(modelMatrix)
+}
+
+CELLector.makeSelection<-function(modelMat,n){
+
+
+  selectedCLS<-vector()
+  modelAccounted<-vector()
+
+  modelMatIdx<-0
+
+  flag<-1
+
+  TOinclude<-colnames(modelMat)
+
+  while(length(selectedCLS)<n & length(TOinclude)>0){
+
+    modelMatIdx<-modelMatIdx+1
+    if(modelMatIdx>nrow(modelMat)){
+      modelMatIdx<-1
+    }
+
+    if(length(TOinclude)>1){
+      possibleSelections<-names(which(modelMat[modelMatIdx,setdiff(colnames(modelMat),selectedCLS)]>0))
+    }else{
+      possibleSelections<-TOinclude
+    }
+
+    if (length(possibleSelections)>0){
+      if (modelMatIdx<nrow(modelMat) & length(possibleSelections)>1){
+        remaining<-modelMat[(modelMatIdx+1):nrow(modelMat),possibleSelections]
+
+
+        if (is.matrix(remaining)){
+          remaining<-colSums(remaining)
+        }
+
+        MINC<-NULL
+        if(length(remaining)){
+          MINC<-names(which(remaining==min(remaining)))
+        }
+
+        if(length(MINC)>0){
+          selection<-sample(MINC,1)
+        }else{
+          selection<-sample(possibleSelections,1)
+        }
+      }else{
+        selection<-sample(possibleSelections,1)
+      }
+
+      selectedCLS[flag]<-selection
+      modelAccounted[flag]<-modelMatIdx
+      flag<-flag+1
+
+      TOinclude<-setdiff(TOinclude,selectedCLS)
+
+      print(selectedCLS)
+      print(modelAccounted)
+      print(length(selectedCLS))
+
+    }
+
+
+  }
+
+
+  RES<-data.frame(modelAccounted,selectedCLS,stringsAsFactors = FALSE)
+
+}
+
 ## not Exported functions
 createRuleFromNode<-function(NavTab,nodeIdx){
 
@@ -509,6 +626,29 @@ addNodeToNavTable<-function(NavTable,node){
 
     return(NavTable)
   }
+
+rightMostPath<-function(Tab,node){
+
+  currentNode<-node
+
+  rPath<-vector()
+
+  flag<-1
+  while(Tab[currentNode,'Right.Child.Index']>0){
+    rPath[flag]<-Tab[currentNode,'Right.Child.Index']
+    currentNode<-rPath[flag]
+    flag<-flag+1
+  }
+
+  return(rPath)
+}
+
+leftChildPattern<-function(Tab,nodePattern){
+  lc<-Tab[nodePattern,'Left.Child.Index']
+  lc<-lc[lc>0]
+  return(lc)
+}
+
 
 # library(igraph)
 # library(BBmisc)

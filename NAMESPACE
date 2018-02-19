@@ -5,6 +5,8 @@ export(CELLector.mostSupported_CFEs)
 export(CELLector.cna_look_up)
 export(CELLector.createAllSignatures)
 export(CELLector.solveFormula)
+export(CELLector.selectionVisit)
+export(CELLector.buildModelMatrix)
 
 exportPattern("^[[:alpha:]]+")
 
