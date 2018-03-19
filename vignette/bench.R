@@ -103,11 +103,13 @@ data(CELLector.Pathway_CFEs)
 data(CELLector.CFEs.CNAid_mapping)
 data(CELLector.CFEs.CNAid_decode)
 data(CELLector.HCCancerDrivers)
+data(CELLector.CellLine.BEMs)
 
 
 tumours_BEM<-CELLector.PrimTum.BEMs$COREAD
 
 #CELLector.mostSupported_CFEs(t(tumours_BEM),minlen = 1)
+colnames(tumours_BEM)<-paste(colnames(tumours_BEM),'_',1:ncol(tumours_BEM),sep='')
 
 
 tmp<-CELLector.Build_Search_Space(ctumours = t(tumours_BEM),
@@ -124,7 +126,6 @@ tmp<-CELLector.Build_Search_Space(ctumours = t(tumours_BEM),
                                   NegativeDefinition=TRUE)
 
 
-colnames(tumours_BEM)<-paste(colnames(tumours_BEM),'_',1:ncol(tumours_BEM),sep='')
 
 
 tmp<-CELLector.Build_Search_Space(ctumours = t(tumours_BEM),
@@ -284,4 +285,49 @@ polar.plot(patients,
                             ' (', format(100*currentGlobalSupport, digits=3),'% of ', nrow(TUMOURS$data), ' patients)',sep=''),
            lwd=1, line.col=tmpCol[id],rp.type = 'r', labels=NULL,show.grid=FALSE, show.radial.grid=FALSE, show.grid.labels=FALSE)
 
+
+
+
+tmp<-CELLector.Build_Search_Space(ctumours = t(tumours_BEM),
+                                  verbose = FALSE,
+                                  minGlobSupp = 0.05,
+                                  cancerType = 'COREAD',
+                                  pathwayFocused = c("RAS-RAF-MEK-ERK / JNK signaling","PI3K-AKT-MTOR signaling","WNT signaling"),
+                                  mutOnly = FALSE,
+                                  pathway_CFEs = CELLector.Pathway_CFEs,
+                                  cnaIdMap = CELLector.CFEs.CNAid_mapping,
+                                  cnaIdDecode = CELLector.CFEs.CNAid_decode,
+                                  cdg = CELLector.HCCancerDrivers,
+                                  subCohortDefinition='TP53',
+                                  NegativeDefinition=TRUE)
+
+
+S <- CELLector.createAllSignatures(tmp$navTable)
+encodedSignatures<-S$ES
+
+CELLlineData<-CELLector.CellLine.BEMs$COREAD
+r<-CELLlineData[,2]
+COSMICids<-CELLlineData[,1]
+CELLlineData<-CELLlineData[,3:ncol(CELLlineData)]
+rownames(CELLlineData)<-r
+
+MODELS<-vector()
+for (cc in 1:length(encodedSignatures)){
+  solved<-CELLector.solveFormula(encodedSignatures[[cc]],dataset = CELLlineData)
+  MODELS[cc]<-paste(sort(solved$PS),collapse=', ')
+}
+
+visit<-CELLector.selectionVisit(tmp$navTable)
+
+sortedModels<-MODELS[visit]
+
+NODEidx<-visit[which(sortedModels!='')]
+sortedModels<-sortedModels[which(sortedModels!='')]
+modelMat<-CELLector.buildModelMatrix(sortedModels)
+
+res<-CELLector.makeSelection(modelMat,n=10)
+
+res$modelAccounted<-NODEidx[res$modelAccounted]
+
+colnames(res)<-c('Tumour SubType Index','Representative Cell Line')
 
