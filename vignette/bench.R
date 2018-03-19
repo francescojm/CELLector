@@ -124,6 +124,41 @@ tmp<-CELLector.Build_Search_Space(ctumours = t(tumours_BEM),
                                   NegativeDefinition=TRUE)
 
 
+colnames(tumours_BEM)<-paste(colnames(tumours_BEM),'_',1:ncol(tumours_BEM),sep='')
+
+
+tmp<-CELLector.Build_Search_Space(ctumours = t(tumours_BEM),
+                                  verbose = FALSE,
+                                  minGlobSupp = 0.01,
+                                  cancerType = 'COREAD',
+                                  mutOnly = TRUE,
+                                  pathway_CFEs = CELLector.Pathway_CFEs,
+                                  cnaIdMap = CELLector.CFEs.CNAid_mapping,
+                                  cnaIdDecode = CELLector.CFEs.CNAid_decode,
+                                  cdg = CELLector.HCCancerDrivers)
+
+
+
+tmp<-CELLector.Build_Search_Space(verbose=FALSE,
+                                  ctumours = t(tumours_BEM),
+                                  cancerType = 'COREAD',
+                                  minlen=1,
+                                  mutOnly = TRUE,
+                                  cnaOnly = FALSE,
+                                  minGlobSupp = 0.01,
+                                  FeatureToExclude = '',
+                                  pathwayFocused = NULL,
+                                  pathway_CFEs = CELLector.Pathway_CFEs,
+                                  cnaIdMap = CELLector.CFEs.CNAid_mapping,
+                                  cnaIdDecode = CELLector.CFEs.CNAid_decode,
+                                  cdg = CELLector.HCCancerDrivers,
+                                  subCohortDefinition=NULL,
+                                  NegativeDefinition=FALSE)
+
+
+
+
+
 tmp<-CELLector.Build_Search_Space(ctumours = t(tumours_BEM),
                                   verbose = FALSE,
                                   minGlobSupp = 0.05,
