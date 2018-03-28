@@ -108,16 +108,20 @@ data(CELLector.CellLine.BEMs)
 
 tumours_BEM<-CELLector.PrimTum.BEMs$COREAD
 
-CELLector.mostSupported_CFEs(t(tumours_BEM),minlen = 1)
-colnames(tumours_BEM)<-paste(colnames(tumours_BEM),'_',1:ncol(tumours_BEM),sep='')
+CELLector.mostSupported_CFEs(transactions = t(tumours_BEM),
+                             minlen = 1)
+
+
+tumours_BEM<-CELLector.unicizeSamples(tumours_BEM)
 
 
 tmp<-CELLector.Build_Search_Space(ctumours = t(tumours_BEM),
                                   verbose = FALSE,
                                   minGlobSupp = 0.05,
                                   cancerType = 'COREAD',
-                                  pathwayFocused = c("RAS-RAF-MEK-ERK / JNK signaling","PI3K-AKT-MTOR signaling","WNT signaling"),
-                                  mutOnly = FALSE,
+                                  pathwayFocused = c("RAS-RAF-MEK-ERK / JNK signaling",
+                                                     "PI3K-AKT-MTOR signaling",
+                                                     "WNT signaling"),
                                   pathway_CFEs = CELLector.Pathway_CFEs,
                                   cnaIdMap = CELLector.CFEs.CNAid_mapping,
                                   cnaIdDecode = CELLector.CFEs.CNAid_decode,

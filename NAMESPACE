@@ -1,10 +1,15 @@
 import(arules)
 
+
+## documented
+export(CELLector.cna_look_up)
+export(CELLector.mostSupported_CFEs)
+export(CELLector.Build_Search_Space)
+
+## not documented
+export(CELLector.unicizeSamples)
 export(CELLector.solveFormula)
 export(CELLector.createAllSignatures)
-export(CELLector.Build_Search_Space)
-export(CELLector.mostSupported_CFEs)
-export(CELLector.cna_look_up)
 export(CELLector.selectionVisit)
 export(CELLector.buildModelMatrix)
 export(CELLector.makeSelection)

@@ -1,84 +1,72 @@
 
-# testing the new repo
 
-## Exported functions
+## Exported Documented functions
+CELLector.mostSupported_CFEs<-function(transactions,minSupport=0.05,minlen=1,maxLen=10){
+  res<-
+    eclat(transactions,
+          parameter=list(supp=minSupport,minlen=minlen,maxlen=maxLen),control=list(verbose=F))
 
-CELLector.solveFormula<-function(RULE,dataset,To_beExcluded=NULL){
-
-  tdataset<-dataset
-
-  tdataset<-tdataset[setdiff(rownames(tdataset),To_beExcluded),]
-
-  tokenize<-unlist(str_split(RULE,' '))
-  tokenize<-tokenize[tokenize!='']
-
-  NegVar<-grep('~',tokenize)
-  PosVar<-setdiff(1:length(tokenize),NegVar)
-  ortok<-tokenize
-  tokenize<-str_replace(tokenize,'~','')
-
-  tdataset<-t(tdataset)
-
-  notPresentPosVar<-setdiff(tokenize[PosVar],rownames(tdataset))
-  notPresentNegVar<-setdiff(tokenize[NegVar],rownames(tdataset))
-
-  if(length(notPresentNegVar)){
-
-    toAdd<-matrix(0,length(notPresentNegVar),ncol(tdataset),dimnames = list(notPresentNegVar,colnames(tdataset)))
-    tdataset<-rbind(tdataset,toAdd)
-
-  }
-
-  if(length(notPresentPosVar)==0){
-    tdataset<-rbind(tdataset[tokenize[PosVar],],1-tdataset[tokenize[NegVar],])
-    rownames(tdataset)<-c(ortok[PosVar],ortok[NegVar])
-
-    positiveSamples<-names(which(colSums(tdataset)==length(ortok)))
-    nsamples<-length(positiveSamples)
-    frac<-nsamples/nrow(dataset)
-
-    return(list(PS=positiveSamples,N=nsamples,PERC=frac))
+  if(length(res)>0){
+    mostSI<-as(items(sort(res)[1]), "list")[[1]]
+    if(length(mostSI)>1){
+      absSupport<-sum(rowSums(transactions[,mostSI])==length(mostSI))
+      SP<-names(which(rowSums(transactions[,mostSI])==length(mostSI)))
+      support<-absSupport/nrow(transactions)
+    }else{
+      absSupport<-sum(transactions[,mostSI])
+      SP<-rownames(transactions)[which(transactions[,mostSI]>0)]
+      support<-absSupport/nrow(transactions)
+    }
   }else{
-    return(NULL)
+    mostSI<-NULL
+    SP<-NULL
+    absSupport<-0
+    support<-0
   }
+
+  RES<-list(MSIS=mostSI,SUPPORT=support,absSUPPORT=absSupport,supportingSamples=SP)
+  return(RES)
+}
+CELLector.cna_look_up <- function(cna_ID, cnaId_decode, TCGALabel) {
+
+  cnaKEY16<-cnaId_decode
+  CancerSpecificData <- cnaKEY16 %>% filter(CancerType == paste(TCGALabel))
+
+  if (length(cna_ID) == 1) {
+
+    info <- CancerSpecificData %>% filter(CNA_Identifier == paste0(cna_ID)) %>% select(Identifier, Recurrent, chr, start, stop,
+                                                                                       locus, nGenes, ContainedGenes)
+
+
+  } else if (length(cna_ID) > 1) {
+
+    info <- CancerSpecificData %>% filter(CNA_Identifier %in% cna_ID) %>% select(Identifier, Recurrent, chr, start, stop, locus,
+                                                                                 nGenes, ContainedGenes)
+
+  }
+
+  return(info)
 
 }
 
-CELLector.createAllSignatures<-function(NavTab){
-    NN<-NavTab$Idx
-
-    signatures<-vector()
-    encodedsignatures<-vector()
-
-    for (i in 1:length(NN)){
-      S<-createRuleFromNode(NavTab,NN[i])
-      signatures[i]<-S$S
-      encodedsignatures[i]<-S$ES
-      }
-
-    names(signatures)<-NN
-    names(encodedsignatures)<-NN
-    return(list(S=signatures,ES=encodedsignatures))
-    }
-
 CELLector.Build_Search_Space<-function(ctumours,
-                                 cancerType,
-                                 minlen=1,
-                                 verbose=TRUE,
-                                 mutOnly=FALSE,
-                                 cnaOnly=FALSE,
-                                 minGlobSupp=0.01,
-                                 FeatureToExclude=NULL,
-                                 pathway_CFEs = NULL,
-                                 pathwayFocused=NULL,
-                                 subCohortDefinition=NULL,
-                                 NegativeDefinition=FALSE,
-                                 cnaIdMap,
-                                 cnaIdDecode,
-                                 cdg){
+                                       cancerType,
+                                       minlen=1,
+                                       verbose=TRUE,
+                                       mutOnly=FALSE,
+                                       cnaOnly=FALSE,
+                                       minGlobSupp=0.01,
+                                       FeatureToExclude=NULL,
+                                       pathway_CFEs = NULL,
+                                       pathwayFocused=NULL,
+                                       subCohortDefinition=NULL,
+                                       NegativeDefinition=FALSE,
+                                       cnaIdMap,
+                                       cnaIdDecode,
+                                       cdg){
 
 
- # rownames(ctumours)<-paste(rownames(ctumours),'_',1:nrow(ctumours),sep='')
+  # rownames(ctumours)<-paste(rownames(ctumours),'_',1:nrow(ctumours),sep='')
 
   PANcna_KEY<-cnaIdMap
   cnaKEY16<-cnaIdDecode
@@ -251,51 +239,79 @@ CELLector.Build_Search_Space<-function(ctumours,
 
   return(list(navTable=NT,TreeRoot=nROOT))
 }
-CELLector.mostSupported_CFEs<-function(transactions,minSupport=0.05,minlen=1,maxLen=10){
-  res<-eclat(transactions,parameter=list(supp=minSupport,minlen=minlen,maxlen=maxLen),control=list(verbose=F))
 
-  if(length(res)>0){
-    mostSI<-as(items(sort(res)[1]), "list")[[1]]
-    if(length(mostSI)>1){
-      absSupport<-sum(rowSums(transactions[,mostSI])==length(mostSI))
-      SP<-names(which(rowSums(transactions[,mostSI])==length(mostSI)))
-      support<-absSupport/nrow(transactions)
-    }else{
-      absSupport<-sum(transactions[,mostSI])
-      SP<-rownames(transactions)[which(transactions[,mostSI]>0)]
-      support<-absSupport/nrow(transactions)
-    }
+
+
+## Exported functions
+CELLector.unicizeSamples<-function(ctumours,keepReplicates=TRUE){
+  if (keepReplicates){
+    colnames(ctumours)<-paste(colnames(ctumours),'_',1:ncol(ctumours),sep='')
   }else{
-    mostSI<-NULL
-    SP<-NULL
-    absSupport<-0
-    support<-0
+    ctumours<-ctumours[,unique(colnames(ctumours))]
+  }
+  return(ctumours)
+}
+CELLector.solveFormula<-function(RULE,dataset,To_beExcluded=NULL){
+
+  tdataset<-dataset
+
+  tdataset<-tdataset[setdiff(rownames(tdataset),To_beExcluded),]
+
+  tokenize<-unlist(str_split(RULE,' '))
+  tokenize<-tokenize[tokenize!='']
+
+  NegVar<-grep('~',tokenize)
+  PosVar<-setdiff(1:length(tokenize),NegVar)
+  ortok<-tokenize
+  tokenize<-str_replace(tokenize,'~','')
+
+  tdataset<-t(tdataset)
+
+  notPresentPosVar<-setdiff(tokenize[PosVar],rownames(tdataset))
+  notPresentNegVar<-setdiff(tokenize[NegVar],rownames(tdataset))
+
+  if(length(notPresentNegVar)){
+
+    toAdd<-matrix(0,length(notPresentNegVar),ncol(tdataset),dimnames = list(notPresentNegVar,colnames(tdataset)))
+    tdataset<-rbind(tdataset,toAdd)
+
   }
 
-  RES<-list(MSIS=mostSI,SUPPORT=support,absSUPPORT=absSupport,supportingSamples=SP)
-  return(RES)
-}
-CELLector.cna_look_up <- function(cna_ID, cnaId_decode, TCGALabel) {
+  if(length(notPresentPosVar)==0){
+    tdataset<-rbind(tdataset[tokenize[PosVar],],1-tdataset[tokenize[NegVar],])
+    rownames(tdataset)<-c(ortok[PosVar],ortok[NegVar])
 
-  cnaKEY16<-cnaId_decode
-  CancerSpecificData <- cnaKEY16 %>% filter(CancerType == paste(TCGALabel))
+    positiveSamples<-names(which(colSums(tdataset)==length(ortok)))
+    nsamples<-length(positiveSamples)
+    frac<-nsamples/nrow(dataset)
 
-  if (length(cna_ID) == 1) {
-
-    info <- CancerSpecificData %>% filter(CNA_Identifier == paste0(cna_ID)) %>% select(Identifier, Recurrent, chr, start, stop,
-                                                                                       locus, nGenes, ContainedGenes)
-
-
-  } else if (length(cna_ID) > 1) {
-
-    info <- CancerSpecificData %>% filter(CNA_Identifier %in% cna_ID) %>% select(Identifier, Recurrent, chr, start, stop, locus,
-                                                                                 nGenes, ContainedGenes)
-
+    return(list(PS=positiveSamples,N=nsamples,PERC=frac))
+  }else{
+    return(NULL)
   }
 
-  return(info)
-
 }
+
+CELLector.createAllSignatures<-function(NavTab){
+    NN<-NavTab$Idx
+
+    signatures<-vector()
+    encodedsignatures<-vector()
+
+    for (i in 1:length(NN)){
+      S<-createRuleFromNode(NavTab,NN[i])
+      signatures[i]<-S$S
+      encodedsignatures[i]<-S$ES
+      }
+
+    names(signatures)<-NN
+    names(encodedsignatures)<-NN
+    return(list(S=signatures,ES=encodedsignatures))
+    }
+
+
+
+
 
 CELLector.selectionVisit<-function(TAV){
   reducedTab<-TAV[,c(1,4,5,10,11)]

@@ -20,7 +20,9 @@ A table with identifiers of cancer functional events (CFEs) involving chromosoma
     \item{\code{nGenes}}{Number of protein coding genes included in the RACS}
     \item{\code{locus}}{Genomic locus of the RACS}
     \item{\code{ContainedGenes}}{A string with comma separated symbols of the genes included in the RACS}
-    \item{\code{CNA_Identifier}}{A string containing the identifer of the RACS as it appears in the Binary Event Matrix (BEM) of the cancer type specified in the \code{CancerType} field included in the \code{CELLector.CellLine.BEMs} and the \code{CELLector.PrimTum.BEMs} data objects}
+    \item{\code{CNA_Identifier}}{A string containing the identifer of the RACS as it appears in the Binary Event Matrix (BEM) of the cancer type specified in the \code{CancerType} field included in the
+
+    \code{CELLector.CellLine.BEMs} and the \code{CELLector.PrimTum.BEMs} data objects}
   }
 }
 \details{

@@ -8,6 +8,7 @@ Cancer Functional Events
 Identifiers of cancer functional events (CFEs, i.e. somatic mutations in high confidence cancer driver genes or chromosomal regions of recurrent copy number amplification/deletion) from [1], which are also present in the binary event matrices of the cell lines and the primary tumours considered in this version of CELLector.
 }
 \usage{data("CELLector.CFEs")}
+\format{
 A vector of strings with one entry per identifier.
 }
 \details{
@@ -25,6 +26,8 @@ data(CELLector.CFEs)
 head(CELLector.CFEs)
 }
 \seealso{
-\code{\link{CELLector.PrimTum.BEMs}}, \code{\link{CELLector.CellLine.BEMs}}, \code{\link{CELLector.CFEs}}, \code{\link{CELLector.CFEs.CNAid_decode}}
+\code{\link{CELLector.PrimTum.BEMs}}, \code{\link{CELLector.CellLine.BEMs}},
+
+\code{\link{CELLector.CFEs}}, \code{\link{CELLector.CFEs.CNAid_decode}}
 }
 \keyword{datasets}

@@ -12,7 +12,8 @@ A named list of binary matrices (with TCGA cancer type labels as names). The ent
 \details{
 BEMs of primary tumours from the Genomics of Drug Sensitivity in Cancer (GDSC1000, [1]) study. Data is available for 16 different TCGA cancer types: \emph{BLCA, BRCA, COREAD, GBM, HNSC, KIRC, LAML, LGG, LUAD, LUSC, OV, PRAD, SKCM, STAD, THCA, UCEC}.
 
-A decoding table for these labels is available at \link{https://www.cancerrxgene.org/gdsc1000/GDSC1000_WebResources/Data_Summary.html}.
+A decoding table for these labels is available at
+\href{https://www.cancerrxgene.org/gdsc1000/GDSC1000_WebResources/Data_Summary.html}.
 
 Each data frame contains primary tumour samples on the columns and CFEs on the rows, with entries indicating the presence/absence of a given CFE in a given primary tumour sample.
 
@@ -21,7 +22,7 @@ A list with all the considered CFEs is available in the \code{\link{CELLector.CF
 
 Please note that the same RACS identifier across multiple cancer types might indicate different chromosomal regions, therefore in order to be decode it should be considered jointly with the TCGA label of the data frame it has been extracted from.
 }
-eferences{
+\references{
 [1] Iorio, F. et al. A Landscape of Pharmacogenomic Interactions in Cancer. Cell 166, 740–754 (2016).
 }
 \examples{
