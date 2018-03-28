@@ -5,7 +5,6 @@ library(sunburstR)
 library(igraph)
 library(collapsibleTree)
 
-
 data(CELLector.PrimTum.BEMs)
 data(CELLector.Pathway_CFEs)
 data(CELLector.CFEs.CNAid_mapping)

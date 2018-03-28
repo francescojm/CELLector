@@ -108,7 +108,7 @@ data(CELLector.CellLine.BEMs)
 
 tumours_BEM<-CELLector.PrimTum.BEMs$COREAD
 
-#CELLector.mostSupported_CFEs(t(tumours_BEM),minlen = 1)
+CELLector.mostSupported_CFEs(t(tumours_BEM),minlen = 1)
 colnames(tumours_BEM)<-paste(colnames(tumours_BEM),'_',1:ncol(tumours_BEM),sep='')
 
 
