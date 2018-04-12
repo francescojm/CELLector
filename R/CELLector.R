@@ -310,9 +310,6 @@ CELLector.solveFormula<-function(RULE,dataset,To_beExcluded=NULL){
   }
 
 }
-
-## Exported functions
-
 CELLector.buildModelMatrix<-function(Sigs,dataset,searchSpace){
 
   encodedSignatures<-Sigs$ES
@@ -332,7 +329,7 @@ CELLector.buildModelMatrix<-function(Sigs,dataset,searchSpace){
   }
 
   ### visit the searching space for the selection
-  visit<-selectionVisit(searchSpace)
+  visit<-CELLector.selectionVisit(searchSpace)
 
   ### put the cell lines in the same order in which the corresponding subtypes are
   ### encountered in the visit of the searching space
@@ -360,7 +357,6 @@ CELLector.buildModelMatrix<-function(Sigs,dataset,searchSpace){
 
   return(modelMatrix)
 }
-
 CELLector.makeSelection<-function(modelMat,n,searchSpace){
 
 
@@ -416,7 +412,7 @@ CELLector.makeSelection<-function(modelMat,n,searchSpace){
       TOinclude<-setdiff(TOinclude,selectedCLS)
 
 
-      }
+    }
 
 
   }
@@ -432,10 +428,8 @@ CELLector.makeSelection<-function(modelMat,n,searchSpace){
   return(RES)
 }
 
-
-
-## not Exported functions
-selectionVisit<-function(TAV){
+## Other Exported functions
+CELLector.selectionVisit<-function(TAV){
   reducedTab<-TAV[,c(1,4,5,10,11)]
   currentNode<-1
   pileIdx<-1
@@ -464,6 +458,9 @@ selectionVisit<-function(TAV){
   }
   return(pile)
 }
+
+
+## not Exported functions
 
 createRuleFromNode<-function(NavTab,nodeIdx){
 
