@@ -40,9 +40,9 @@ Signatures <- CELLector.createAllSignatures(CSS$navTable)
 
 ModelMat<-CELLector.buildModelMatrix(Signatures,CELLlineData,CSS$navTable)
 
-
-
-
+selectedCellLines<-CELLector.makeSelection(modelMat = ModelMat,
+                                           n=10,
+                                           searchSpace = CSS$navTable)
 
 
 

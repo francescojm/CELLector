@@ -9,8 +9,6 @@ export(CELLector.unicizeSamples)
 export(CELLector.createAllSignatures)
 export(CELLector.solveFormula)
 export(CELLector.buildModelMatrix)
-
-## not documented
 export(CELLector.makeSelection)
 
 exportPattern("^[[:alpha:]]+")

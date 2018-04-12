@@ -332,7 +332,7 @@ CELLector.buildModelMatrix<-function(Sigs,dataset,searchSpace){
   }
 
   ### visit the searching space for the selection
-  visit<-CELLector.selectionVisit(searchSpace)
+  visit<-selectionVisit(searchSpace)
 
   ### put the cell lines in the same order in which the corresponding subtypes are
   ### encountered in the visit of the searching space
@@ -360,7 +360,8 @@ CELLector.buildModelMatrix<-function(Sigs,dataset,searchSpace){
 
   return(modelMatrix)
 }
-CELLector.makeSelection<-function(modelMat,n){
+
+CELLector.makeSelection<-function(modelMat,n,searchSpace){
 
 
   selectedCLS<-vector()
@@ -414,22 +415,22 @@ CELLector.makeSelection<-function(modelMat,n){
 
       TOinclude<-setdiff(TOinclude,selectedCLS)
 
-      print(selectedCLS)
-      print(modelAccounted)
-      print(length(selectedCLS))
 
-    }
+      }
 
 
   }
 
 
-  RES<-data.frame(modelAccounted,selectedCLS,stringsAsFactors = FALSE)
+  signatures<-CELLector.createAllSignatures(searchSpace)
 
+  RES<-data.frame('Tumour SubType Index'=modelAccounted,
+                  'Representative Cell Line'=selectedCLS,
+                  'Signature'=signatures$S[modelAccounted],
+                  'percentage patients'=signatures$STS[modelAccounted],
+                  stringsAsFactors = FALSE)
+  return(RES)
 }
-
-
-
 
 
 
