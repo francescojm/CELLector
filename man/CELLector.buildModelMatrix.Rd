@@ -83,7 +83,7 @@ CSS<-CELLector.Build_Search_Space(ctumours = t(tumours_BEM),
 Signatures <- CELLector.createAllSignatures(CSS$navTable)
 
 ### mapping colorectal cancer cell lines onto the CELLector searching space
-ModelMat<-CELLector.buildModelMatrix(Signatures,CELLlineData,CSS$navTable)
+ModelMat<-CELLector.buildModelMatrix(Signatures$ES,CELLlineData,CSS$navTable)
 
 head(ModelMat)
 

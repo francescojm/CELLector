@@ -312,7 +312,7 @@ CELLector.solveFormula<-function(RULE,dataset,To_beExcluded=NULL){
 }
 CELLector.buildModelMatrix<-function(Sigs,dataset,searchSpace){
 
-  encodedSignatures<-Sigs$ES
+  encodedSignatures<-Sigs
 
   ordataset<-dataset
   ### takes just the numerical part of the CELLlineData
