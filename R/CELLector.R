@@ -459,6 +459,77 @@ CELLector.selectionVisit<-function(TAV){
   return(pile)
 }
 
+CELLector.visualiseSearchingSpace<-function(searchSpace){
+  CC <- colors(distinct = TRUE)
+  CC <- CC[setdiff(1:length(CC),grep('gray',CC))]
+  CC <- rgb(t(col2rgb(CC)),maxColorValue = 255)
+
+  COLORSbyLev <- CC[sample(length(CC))][1:searchSpace$TreeRoot$totalCount]
+
+  RelatesToFatherAs <- rep('-',searchSpace$TreeRoot$totalCount)
+  RelatesToFatherAs[which(Get(Traverse(searchSpace$TreeRoot,traversal = 'level'),
+                              attribute = 'NodeType')=='Right.Child')]<-'Complement'
+  RelatesToFatherAs[which(Get(Traverse(searchSpace$TreeRoot,traversal = 'level'),
+                              attribute = 'NodeType')=='Left.Child')]<-'Refinement'
+
+  searchSpace$TreeRoot$Set(Colors=COLORSbyLev,traversal = 'level')
+  searchSpace$TreeRoot$Set(RelatesToFatherAs=RelatesToFatherAs,traversal = 'level')
+
+
+  NPs<-createHtmlNodeProperties(searchSpace)
+
+  searchSpace$TreeRoot$Set(tthm=NPs,traversal='level')
+  #SunBurstSequences$data<-CELLector_App.sunBurstFormat(NT$data$navTable)
+
+  collapsibleTree(searchSpace$TreeRoot,
+                  fill = 'Colors',
+                  inputId = 'searchSpace',
+                  tooltip = TRUE,
+                  tooltipHtml = 'tthm',
+                  attribute = 'RelatesToFatherAs')
+
+
+}
+
+
+
+
+createHtmlNodeProperties<-function(LocalSearchSpace){
+
+  tree<-LocalSearchSpace$TreeRoot
+
+  nodeIds<-as.numeric(unlist(lapply(str_split(names(Get(Traverse(Tree,traversal = 'level'),'NodeType')),' '),
+                                    function(x){x[1]})))
+
+  nnodes<-length(nodeIds)
+
+  signatures<-CELLector.createAllSignatures(LocalSearchSpace$navTable)$S
+
+  nodeTypes<-as.character(LocalSearchSpace$navTable$Type[nodeIds])
+  parents<-LocalSearchSpace$navTable$Parent.Idx[nodeIds]
+
+  nodeTypes[nodeTypes=='Right.Child']<-paste('Complement of SubType ',parents[nodeTypes=='Right.Child'])
+  nodeTypes[nodeTypes=='Left.Child']<-paste('Refinement of SubType ',parents[nodeTypes=='Left.Child'])
+
+  typeColors<-rep('black',length(COLORS))
+
+  html_node_summaries<-vector()
+  for (i in 1:nnodes){
+    header<-'<!DOCTYPE html><html><head><title>'
+    TITLE<-paste('Patient SubType id:',nodeIds[i])
+    postTitle<-'</title></head><body>'
+    pageContent<-paste('<b>Patient SubType id:',nodeIds[i],'</b><br /><br />')
+    pageContent<-paste(pageContent,'<b>Underlying signature:</b><i>',signatures[i],'</i><br /><br />')
+    pageContent<-paste(pageContent,'<p style="background-color:Tomato;">',nodeTypes[i],'</p>')
+    tail<-'</body></html>'
+
+    html_node_summaries[i]<-paste(header,TITLE,postTitle,pageContent,tail,sep='')
+  }
+
+  return(html_node_summaries)
+
+}
+
 
 ## not Exported functions
 
