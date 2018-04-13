@@ -41,7 +41,9 @@ A list with the following fields:
    \item{supportingSamples}{The identifiers of the samples supporting \code{MSIS}, i.e. the names of the columns of \emph{transactions}, in which the entries corresponding to \code{MSIS} rows are equal to 1.}
 }
 \references{
-Najgebauer et al., CELLector: Genomics Guided Selection of Cancer in vitro Models. doi:10.1101/275032
+Najgebauer et al., CELLector: Genomics Guided Selection of Cancer in vitro Models.
+
+doi:10.1101/275032
 }
 \author{
 Hanna Najgebauer and Francesco Iorio

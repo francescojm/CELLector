@@ -5,14 +5,14 @@ import(arules)
 export(CELLector.cna_look_up)
 export(CELLector.mostSupported_CFEs)
 export(CELLector.Build_Search_Space)
-
-## not documented
 export(CELLector.unicizeSamples)
-export(CELLector.solveFormula)
 export(CELLector.createAllSignatures)
-export(CELLector.selectionVisit)
+export(CELLector.solveFormula)
 export(CELLector.buildModelMatrix)
 export(CELLector.makeSelection)
+
+## not documented, used by the app
+export(CELLector.selectionVisit)
 
 exportPattern("^[[:alpha:]]+")
 

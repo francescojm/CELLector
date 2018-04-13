@@ -240,9 +240,6 @@ CELLector.Build_Search_Space<-function(ctumours,
   return(list(navTable=NT,TreeRoot=nROOT))
 }
 
-
-
-## Exported functions
 CELLector.unicizeSamples<-function(ctumours,keepReplicates=TRUE){
   if (keepReplicates){
     colnames(ctumours)<-paste(colnames(ctumours),'_',1:ncol(ctumours),sep='')
@@ -251,9 +248,31 @@ CELLector.unicizeSamples<-function(ctumours,keepReplicates=TRUE){
   }
   return(ctumours)
 }
+CELLector.createAllSignatures<-function(NavTab){
+  NN<-NavTab$Idx
+
+  signatures<-vector()
+  encodedsignatures<-vector()
+  subTypeSizes<-vector()
+  for (i in 1:length(NN)){
+    S<-createRuleFromNode(NavTab,NN[i])
+    signatures[i]<-S$S
+    encodedsignatures[i]<-S$ES
+    subTypeSizes[i]<-NavTab$GlobalSupport[i]
+  }
+
+  names(signatures)<-NN
+  names(encodedsignatures)<-NN
+  return(list(S=signatures,ES=encodedsignatures,STS=100*subTypeSizes))
+}
 CELLector.solveFormula<-function(RULE,dataset,To_beExcluded=NULL){
 
-  tdataset<-dataset
+  r<-dataset[,2]
+  COSMICids<-dataset[,1]
+  CELLlineData<-as.matrix(dataset[,3:ncol(dataset)])
+  rownames(CELLlineData)<-r
+
+  tdataset<-CELLlineData
 
   tdataset<-tdataset[setdiff(rownames(tdataset),To_beExcluded),]
 
@@ -291,59 +310,36 @@ CELLector.solveFormula<-function(RULE,dataset,To_beExcluded=NULL){
   }
 
 }
+CELLector.buildModelMatrix<-function(Sigs,dataset,searchSpace){
 
-CELLector.createAllSignatures<-function(NavTab){
-    NN<-NavTab$Idx
+  encodedSignatures<-Sigs
 
-    signatures<-vector()
-    encodedsignatures<-vector()
+  ordataset<-dataset
+  ### takes just the numerical part of the CELLlineData
+  r<-dataset[,2]
+  COSMICids<-dataset[,1]
+  dataset<-dataset[,3:ncol(dataset)]
+  rownames(dataset)<-r
 
-    for (i in 1:length(NN)){
-      S<-createRuleFromNode(NavTab,NN[i])
-      signatures[i]<-S$S
-      encodedsignatures[i]<-S$ES
-      }
-
-    names(signatures)<-NN
-    names(encodedsignatures)<-NN
-    return(list(S=signatures,ES=encodedsignatures))
-    }
-
-
-
-
-
-CELLector.selectionVisit<-function(TAV){
-  reducedTab<-TAV[,c(1,4,5,10,11)]
-  currentNode<-1
-  pileIdx<-1
-  pile<-currentNode
-  nodeType<-reducedTab[currentNode,2]
-
-  while(pileIdx<=length(pile)){
-
-    #print(pile)
-
-    pile<-c(pile,rightMostPath(reducedTab,pile[pileIdx]))
-    nodeType<-reducedTab[pile,2]
-    #print(pile[pileIdx:length(pile)])
-
-    pile<-c(pile,setdiff(leftChildPattern(reducedTab,pile[(pileIdx):length(pile)]),pile))
-    nodeType<-reducedTab[pile,2]
-
-    # print(pile[pileIdx:length(pile)])
-
-    dd <- which(nodeType=='Left.Child')
-    pileIdx<-dd[dd>pileIdx][1]
-
-    if(is.na(pileIdx)){
-      break
-    }
+  ### map cell lines onto subtypes, based on the signatures
+  MODELS<-vector()
+  for (cc in 1:length(encodedSignatures)){
+    solved<-CELLector.solveFormula(encodedSignatures[[cc]],dataset = ordataset)
+    MODELS[cc]<-paste(sort(solved$PS),collapse=', ')
   }
-  return(pile)
-}
-CELLector.buildModelMatrix<-function(modellist){
 
+  ### visit the searching space for the selection
+  visit<-CELLector.selectionVisit(searchSpace)
+
+  ### put the cell lines in the same order in which the corresponding subtypes are
+  ### encountered in the visit of the searching space
+  sortedModels<-MODELS[visit]
+
+  ### ignore subtypes with not mached models (but actually this is what is most interesting for you, right?)
+  NODEidx<-visit[which(sortedModels!='')]
+  sortedModels<-sortedModels[which(sortedModels!='')]
+
+  modellist<-sortedModels
 
   cls_<-list()
   for (i in 1:length(modellist)){
@@ -361,8 +357,7 @@ CELLector.buildModelMatrix<-function(modellist){
 
   return(modelMatrix)
 }
-
-CELLector.makeSelection<-function(modelMat,n){
+CELLector.makeSelection<-function(modelMat,n,searchSpace){
 
 
   selectedCLS<-vector()
@@ -416,9 +411,6 @@ CELLector.makeSelection<-function(modelMat,n){
 
       TOinclude<-setdiff(TOinclude,selectedCLS)
 
-      print(selectedCLS)
-      print(modelAccounted)
-      print(length(selectedCLS))
 
     }
 
@@ -426,11 +418,50 @@ CELLector.makeSelection<-function(modelMat,n){
   }
 
 
-  RES<-data.frame(modelAccounted,selectedCLS,stringsAsFactors = FALSE)
+  signatures<-CELLector.createAllSignatures(searchSpace)
 
+  RES<-data.frame('Tumour SubType Index'=modelAccounted,
+                  'Representative Cell Line'=selectedCLS,
+                  'Signature'=signatures$S[modelAccounted],
+                  'percentage patients'=signatures$STS[modelAccounted],
+                  stringsAsFactors = FALSE)
+  return(RES)
 }
 
+## Other Exported functions
+CELLector.selectionVisit<-function(TAV){
+  reducedTab<-TAV[,c(1,4,5,10,11)]
+  currentNode<-1
+  pileIdx<-1
+  pile<-currentNode
+  nodeType<-reducedTab[currentNode,2]
+
+  while(pileIdx<=length(pile)){
+
+    #print(pile)
+
+    pile<-c(pile,rightMostPath(reducedTab,pile[pileIdx]))
+    nodeType<-reducedTab[pile,2]
+    #print(pile[pileIdx:length(pile)])
+
+    pile<-c(pile,setdiff(leftChildPattern(reducedTab,pile[(pileIdx):length(pile)]),pile))
+    nodeType<-reducedTab[pile,2]
+
+    # print(pile[pileIdx:length(pile)])
+
+    dd <- which(nodeType=='Left.Child')
+    pileIdx<-dd[dd>pileIdx][1]
+
+    if(is.na(pileIdx)){
+      break
+    }
+  }
+  return(pile)
+}
+
+
 ## not Exported functions
+
 createRuleFromNode<-function(NavTab,nodeIdx){
 
   RULES<-list()
