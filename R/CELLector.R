@@ -255,7 +255,7 @@ CELLector.createAllSignatures<-function(NavTab){
   encodedsignatures<-vector()
   subTypeSizes<-vector()
   for (i in 1:length(NN)){
-    S<-createRuleFromNode(NavTab,NN[i])
+    S<-createRuleFromNode(NavTab = NavTab,nodeIdx = NN[i])
     signatures[i]<-S$S
     encodedsignatures[i]<-S$ES
     subTypeSizes[i]<-NavTab$GlobalSupport[i]
@@ -276,13 +276,65 @@ CELLector.solveFormula<-function(RULE,dataset,To_beExcluded=NULL){
 
   tdataset<-tdataset[setdiff(rownames(tdataset),To_beExcluded),]
 
-  tokenize<-unlist(str_split(RULE,' '))
+
+  dRULE<-str_replace_all(RULE,', ','-X-X-X-')
+
+  tokenize<-unlist(str_split(dRULE,' '))
   tokenize<-tokenize[tokenize!='']
+  ortok<-tokenize
+  ortok<-str_replace_all(ortok,'-X-X-X-',', ')
+
+  Id_of_multipleVar<-grep('-X-X-X-',tokenize)
 
   NegVar<-grep('~',tokenize)
   PosVar<-setdiff(1:length(tokenize),NegVar)
-  ortok<-tokenize
-  tokenize<-str_replace(tokenize,'~','')
+
+  NegVarMultiple<-intersect(NegVar,Id_of_multipleVar)
+  PosVarMultiple<-intersect(PosVar,Id_of_multipleVar)
+
+  tokenize<-str_replace_all(tokenize,'~','')
+
+  NegVarIndividual<-tokenize[setdiff(NegVar,NegVarMultiple)]
+  PosVarIndividual<-tokenize[setdiff(PosVar,PosVarMultiple)]
+
+  if(length(PosVarMultiple)>0){
+    currentMultiple<-tokenize[PosVarMultiple]
+    individualMultiple<-unlist(str_split(tokenize[PosVarMultiple],'-X-X-X-'))
+    NewTokenizePos<-setdiff(c(setdiff(tokenize,tokenize[PosVarMultiple]),individualMultiple),NegVarIndividual)
+  }else{
+    NewTokenizePos<-NULL
+  }
+
+  if(length(NegVarMultiple)>0){
+    currentMultiple<-tokenize[NegVarMultiple]
+    individualMultiple<-unlist(str_split(tokenize[NegVarMultiple],'-X-X-X-'))
+    NewTokenizeNeg<-setdiff(c(setdiff(tokenize,tokenize[NegVarMultiple]),individualMultiple),PosVarIndividual)
+  }else{
+    NewTokenizeNeg<-NULL
+  }
+
+  if(length(grep('-X-X-X-',tokenize))>0){
+    tokenize<-tokenize[-grep('-X-X-X-',tokenize)]
+  }
+
+  if(length(grep('-X-X-X-',NewTokenizePos))>0){
+    NewTokenizePos<-NewTokenizePos[-grep('-X-X-X-',NewTokenizePos)]
+  }
+
+  if(length(grep('-X-X-X-',NewTokenizeNeg))>0){
+    NewTokenizeNeg<-NewTokenizeNeg[-grep('-X-X-X-',NewTokenizeNeg)]
+  }
+
+  newNegVar<-sort(union(setdiff(NewTokenizeNeg,NewTokenizePos),NegVarIndividual))
+  newPosVar<-sort(union(setdiff(NewTokenizePos,NewTokenizeNeg),PosVarIndividual))
+
+  tokenize<-union(newNegVar,newPosVar)
+
+  tokenize<-sort(tokenize)
+
+
+  PosVar<-match(newPosVar,tokenize)
+  NegVar<-match(newNegVar,tokenize)
 
   tdataset<-t(tdataset)
 
@@ -298,15 +350,14 @@ CELLector.solveFormula<-function(RULE,dataset,To_beExcluded=NULL){
 
   if(length(notPresentPosVar)==0){
     tdataset<-rbind(tdataset[tokenize[PosVar],],1-tdataset[tokenize[NegVar],])
-    rownames(tdataset)<-c(ortok[PosVar],ortok[NegVar])
 
-    positiveSamples<-names(which(colSums(tdataset)==length(ortok)))
+    positiveSamples<-names(which(colSums(tdataset)==length(tokenize)))
     nsamples<-length(positiveSamples)
     frac<-nsamples/nrow(dataset)
 
     return(list(PS=positiveSamples,N=nsamples,PERC=frac))
   }else{
-    return(NULL)
+    return(list(PS=NULL,N=0,PERC=0))
   }
 
 }
@@ -329,7 +380,7 @@ CELLector.buildModelMatrix<-function(Sigs,dataset,searchSpace){
   }
 
   ### visit the searching space for the selection
-  visit<-CELLector.selectionVisit(searchSpace)
+  suppressWarnings(visit<-CELLector.selectionVisit(searchSpace))
 
   ### put the cell lines in the same order in which the corresponding subtypes are
   ### encountered in the visit of the searching space
@@ -355,8 +406,10 @@ CELLector.buildModelMatrix<-function(Sigs,dataset,searchSpace){
     modelMatrix[i,cls_[[i]]]<-1
   }
 
+  rownames(modelMatrix)<-as.character(NODEidx)
   return(modelMatrix)
 }
+
 CELLector.makeSelection<-function(modelMat,n,searchSpace){
 
 
@@ -427,6 +480,47 @@ CELLector.makeSelection<-function(modelMat,n,searchSpace){
                   stringsAsFactors = FALSE)
   return(RES)
 }
+CELLector.visualiseSearchingSpace<-function(searchSpace,CLdata=NULL){
+  CC <- colors(distinct = TRUE)
+  CC <- CC[setdiff(1:length(CC),grep('gray',CC))]
+  CC <- rgb(t(col2rgb(CC)),maxColorValue = 255)
+
+  COLORSbyLev <- CC[sample(length(CC))][1:searchSpace$TreeRoot$totalCount]
+
+  RelatesToFatherAs <- rep('-',searchSpace$TreeRoot$totalCount)
+  RelatesToFatherAs[which(Get(Traverse(searchSpace$TreeRoot,traversal = 'level'),
+                              attribute = 'NodeType')=='Right.Child')]<-'Complement'
+  RelatesToFatherAs[which(Get(Traverse(searchSpace$TreeRoot,traversal = 'level'),
+                              attribute = 'NodeType')=='Left.Child')]<-'Refinement'
+
+  searchSpace$TreeRoot$Set(Colors=COLORSbyLev,traversal = 'level')
+  searchSpace$TreeRoot$Set(RelatesToFatherAs=RelatesToFatherAs,traversal = 'level')
+
+
+  levelVisitOrder<-as.numeric(unlist(lapply(str_split(Get(Traverse(searchSpace$TreeRoot,
+                                                                   traversal = 'level'),'name'),' '),function(x){x[1]})))
+
+
+  NPs<-createHtmlNodeProperties(LocalSearchSpace = searchSpace,
+                                 CLdataset = CLdata)
+
+  searchSpace$TreeRoot$Set(size=searchSpace$navTable$GlobalSupport[levelVisitOrder],traversal = 'level')
+  #searchSpace$TreeRoot$Set(tthm=NPs[levelVisitOrder],traversal='level')
+
+  searchSpace$TreeRoot$Set(tthm=NPs,traversal='level')
+  collapsibleTree(searchSpace$TreeRoot,
+                   nodeSize = 'size',
+                   fill = 'Colors',
+                   inputId = 'searchSpace',
+                   tooltip = TRUE,
+                   tooltipHtml = 'tthm',
+                   attribute = 'RelatesToFatherAs')
+
+
+
+
+
+}
 
 ## Other Exported functions
 CELLector.selectionVisit<-function(TAV){
@@ -459,68 +553,72 @@ CELLector.selectionVisit<-function(TAV){
   return(pile)
 }
 
-CELLector.visualiseSearchingSpace<-function(searchSpace){
-  CC <- colors(distinct = TRUE)
-  CC <- CC[setdiff(1:length(CC),grep('gray',CC))]
-  CC <- rgb(t(col2rgb(CC)),maxColorValue = 255)
 
-  COLORSbyLev <- CC[sample(length(CC))][1:searchSpace$TreeRoot$totalCount]
-
-  RelatesToFatherAs <- rep('-',searchSpace$TreeRoot$totalCount)
-  RelatesToFatherAs[which(Get(Traverse(searchSpace$TreeRoot,traversal = 'level'),
-                              attribute = 'NodeType')=='Right.Child')]<-'Complement'
-  RelatesToFatherAs[which(Get(Traverse(searchSpace$TreeRoot,traversal = 'level'),
-                              attribute = 'NodeType')=='Left.Child')]<-'Refinement'
-
-  searchSpace$TreeRoot$Set(Colors=COLORSbyLev,traversal = 'level')
-  searchSpace$TreeRoot$Set(RelatesToFatherAs=RelatesToFatherAs,traversal = 'level')
-
-
-  NPs<-createHtmlNodeProperties(searchSpace)
-
-  searchSpace$TreeRoot$Set(tthm=NPs,traversal='level')
-  #SunBurstSequences$data<-CELLector_App.sunBurstFormat(NT$data$navTable)
-
-  collapsibleTree(searchSpace$TreeRoot,
-                  fill = 'Colors',
-                  inputId = 'searchSpace',
-                  tooltip = TRUE,
-                  tooltipHtml = 'tthm',
-                  attribute = 'RelatesToFatherAs')
-
-
-}
-
-
-
-
-createHtmlNodeProperties<-function(LocalSearchSpace){
+## not Exported functions
+createHtmlNodeProperties<-function(LocalSearchSpace,CLdataset=NULL){
 
   tree<-LocalSearchSpace$TreeRoot
 
-  nodeIds<-as.numeric(unlist(lapply(str_split(names(Get(Traverse(Tree,traversal = 'level'),'NodeType')),' '),
+  nodeIds<-as.numeric(unlist(lapply(str_split(names(Get(Traverse(LocalSearchSpace$TreeRoot,traversal = 'level'),'NodeType')),' '),
                                     function(x){x[1]})))
 
   nnodes<-length(nodeIds)
 
-  signatures<-CELLector.createAllSignatures(LocalSearchSpace$navTable)$S
+  signatures<-CELLector.createAllSignatures(NavTab = LocalSearchSpace$navTable)
+
+  SS<-signatures
+
+  signatures<-signatures$S[nodeIds]
+
+  if(length(CLdataset)>0){
+    modelMat<-CELLector.buildModelMatrix(Sigs = SS$ES,dataset = CLdataset,searchSpace = LocalSearchSpace$navTable)
+
+
+  }
+
 
   nodeTypes<-as.character(LocalSearchSpace$navTable$Type[nodeIds])
   parents<-LocalSearchSpace$navTable$Parent.Idx[nodeIds]
 
+  NT<-nodeTypes
   nodeTypes[nodeTypes=='Right.Child']<-paste('Complement of SubType ',parents[nodeTypes=='Right.Child'])
   nodeTypes[nodeTypes=='Left.Child']<-paste('Refinement of SubType ',parents[nodeTypes=='Left.Child'])
 
-  typeColors<-rep('black',length(COLORS))
+  typeColors<-rep('Gray',tree$GlobalSupp)
+  typeColors[which(NT=='Right.Child')]<-'Tomato'
+  typeColors[which(NT=='Left.Child')]<-'MediumSeaGreen'
+
+  npatients<-LocalSearchSpace$navTable$AbsSupport[nodeIds]
+  percOnTotal<-LocalSearchSpace$navTable$GlobalSupport[nodeIds]
+  percOnPop<-LocalSearchSpace$navTable$PercSupport[nodeIds]
 
   html_node_summaries<-vector()
   for (i in 1:nnodes){
     header<-'<!DOCTYPE html><html><head><title>'
     TITLE<-paste('Patient SubType id:',nodeIds[i])
     postTitle<-'</title></head><body>'
-    pageContent<-paste('<b>Patient SubType id:',nodeIds[i],'</b><br /><br />')
-    pageContent<-paste(pageContent,'<b>Underlying signature:</b><i>',signatures[i],'</i><br /><br />')
-    pageContent<-paste(pageContent,'<p style="background-color:Tomato;">',nodeTypes[i],'</p>')
+    pageContent<-paste('<p style="font-size:15px;"><b>Patient SubType:',nodeIds[i],'</b></p>')
+    pageContent<-paste(pageContent,'<b>Underlying signature:</b><br /><i>',signatures[i],'</i><br /><br />')
+    pageContent<-paste(pageContent,'<p style="background-color:',typeColors[i],';">',nodeTypes[i],'</p><br />')
+    pageContent<-paste(pageContent,'<b>N of Patients:</b>',npatients[i],'<br />')
+    pageContent<-paste(pageContent,format(100*percOnTotal[i],digits=3),'% of total <br />',sep='')
+    if (NT[i]!='root'){
+      if(NT[i]=='Right.Child'){
+        pageContent<-paste(pageContent,format(100*percOnPop[i],digits=3),'% of subType',parents[i],' complement<br />',sep='')
+      }else{
+        pageContent<-paste(pageContent,format(100*percOnPop[i],digits=3),'% of subType',parents[i],'<br />',sep='')
+      }
+
+    }
+
+    if(length(CLdataset)>0){
+       if (!is.element(nodeIds[i],rownames(modelMat))){
+         pageContent<-paste(pageContent,'<p style="color:Tomato;"><b>No cell lines</b></p><br />')
+         }else{
+            pageContent<-paste(pageContent,'<p style="color:MediumSeaGreen;"><b>',
+                              sum(modelMat[as.character(nodeIds[i]),]),'cell lines</b></p><br />')
+         }
+       }
     tail<-'</body></html>'
 
     html_node_summaries[i]<-paste(header,TITLE,postTitle,pageContent,tail,sep='')
@@ -529,10 +627,6 @@ createHtmlNodeProperties<-function(LocalSearchSpace){
   return(html_node_summaries)
 
 }
-
-
-## not Exported functions
-
 createRuleFromNode<-function(NavTab,nodeIdx){
 
   RULES<-list()
@@ -555,7 +649,7 @@ createRuleFromNode<-function(NavTab,nodeIdx){
       }else{
         prefix<-''
       }
-      currentTerm<-paste(prefix,NavTab$ItemsDecoded[pos],sep='')
+      currentTerm<-paste(prefix,str_trim(as.character(NavTab$ItemsDecoded[pos])),sep='')
       SIGNATURE<-paste(currentTerm,SIGNATURE)
       EcurrentTerm<-paste(prefix,NavTab$Items[pos],sep='')
       encodedSIGNATURE<-paste(EcurrentTerm,encodedSIGNATURE)

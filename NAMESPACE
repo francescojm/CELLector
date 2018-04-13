@@ -10,6 +10,7 @@ export(CELLector.createAllSignatures)
 export(CELLector.solveFormula)
 export(CELLector.buildModelMatrix)
 export(CELLector.makeSelection)
+export(CELLector.visualiseSearchingSpace)
 
 ## not documented, used by the app
 export(CELLector.selectionVisit)
