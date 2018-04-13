@@ -38,7 +38,7 @@ CELLector.solveFormula('~APC BRAF',dataset = CELLlineData)
 ### take all the signatures from the searching space
 Signatures <- CELLector.createAllSignatures(CSS$navTable)
 
-ModelMat<-CELLector.buildModelMatrix(Signatures,CELLlineData,CSS$navTable)
+ModelMat<-CELLector.buildModelMatrix(Signatures$ES,CELLlineData,CSS$navTable)
 
 selectedCellLines<-CELLector.makeSelection(modelMat = ModelMat,
                                            n=10,
