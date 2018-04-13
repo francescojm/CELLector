@@ -32,6 +32,24 @@ CSS<-CELLector.Build_Search_Space(ctumours = t(tumours_BEM),
                                   subCohortDefinition='TP53',
                                   NegativeDefinition=TRUE)
 
+tumours_BEM<-CELLector.PrimTum.BEMs$SKCM
+CELLlineData<-CELLector.CellLine.BEMs$SKCM
+
+### unicize the sample identifiers for the tumour data
+tumours_BEM<-CELLector.unicizeSamples(tumours_BEM)
+
+
+CSS<-CELLector.Build_Search_Space(ctumours = t(tumours_BEM),
+                                  verbose = FALSE,
+                                  minGlobSupp = 0.05,
+                                  cancerType = 'SKCM',
+                                  pathwayFocused = 'RAS-RAF-MEK-ERK / JNK signaling',
+                                  pathway_CFEs = CELLector.Pathway_CFEs,
+                                  cnaIdMap = CELLector.CFEs.CNAid_mapping,
+                                  cnaIdDecode = CELLector.CFEs.CNAid_decode,
+                                  cdg = CELLector.HCCancerDrivers,
+                                  subCohortDefinition='BRAF',
+                                  NegativeDefinition=FALSE)
 
 CELLector.solveFormula('~APC BRAF',dataset = CELLlineData)
 
