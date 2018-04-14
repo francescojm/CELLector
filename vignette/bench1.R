@@ -19,9 +19,15 @@ CSS<-CELLector.Build_Search_Space(ctumours = t(tumours_BEM),
                                   minGlobSupp = 0.05,
                                   cancerType = 'COREAD',
                                   pathway_CFEs = CELLector.Pathway_CFEs,
-                                  cnaIdMap = CELLector.CFEs.CNAid_mapping,mutOnly = FALSE,
+                                  cnaIdMap = CELLector.CFEs.CNAid_mapping,
+                                  mutOnly = FALSE,
                                   cnaIdDecode = CELLector.CFEs.CNAid_decode,
                                   cdg = CELLector.HCCancerDrivers)
+
+
+
+CELLector.visualiseSearchingSpace(searchSpace = CSS,CLdata = CELLlineData)
+CSS<-CELLector.changeSScolors(CSS)
 CELLector.visualiseSearchingSpace(searchSpace = CSS,CLdata = CELLlineData)
 
 CELLector.visualiseSearchingSpace_sunBurst(searchSpace = CSS)

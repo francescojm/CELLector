@@ -247,6 +247,17 @@ CELLector.Build_Search_Space<-function(ctumours,
   nROOT$Set(Colors=COLORSbyLev,traversal = 'level')
 
 
+  treeLabels<-unlist(lapply(str_split(Get(Traverse(nROOT,'level'),'name'),'[(]'),
+                            function(x){x[1]}))
+
+  nROOT$Set(name=treeLabels,traversal='level')
+
+  nodeIdx<-as.numeric(unlist(lapply(str_split(treeLabels,' '),function(x){x[1]})))
+
+  COLORS<-rep(NA,length(nodeIdx))
+  COLORS[nodeIdx]<-COLORSbyLev
+
+  NT<-cbind(NT,COLORS)
   return(list(navTable=NT,TreeRoot=nROOT))
 }
 
@@ -351,7 +362,7 @@ CELLector.solveFormula<-function(RULE,dataset,To_beExcluded=NULL){
   notPresentPosVar<-setdiff(tokenize[PosVar],rownames(tdataset))
   notPresentNegVar<-setdiff(tokenize[NegVar],rownames(tdataset))
 
-  if(length(notPresentNegVar)){
+  if(length(notPresentNegVar)>0){
 
     toAdd<-matrix(0,length(notPresentNegVar),ncol(tdataset),dimnames = list(notPresentNegVar,colnames(tdataset)))
     tdataset<-rbind(tdataset,toAdd)
@@ -385,8 +396,8 @@ CELLector.buildModelMatrix<-function(Sigs,dataset,searchSpace){
   ### map cell lines onto subtypes, based on the signatures
   MODELS<-vector()
   for (cc in 1:length(encodedSignatures)){
-    solved<-CELLector.solveFormula(encodedSignatures[[cc]],dataset = ordataset)
-    MODELS[cc]<-paste(sort(solved$PS),collapse=', ')
+    solved<-CELLector.solveFormula(RULE = encodedSignatures[[cc]],dataset = ordataset)
+    suppressWarnings(MODELS[cc]<-paste(sort(solved$PS),collapse=', '))
   }
 
   ### visit the searching space for the selection
@@ -515,6 +526,8 @@ CELLector.visualiseSearchingSpace<-function(searchSpace,CLdata=NULL){
   #searchSpace$TreeRoot$Set(tthm=NPs[levelVisitOrder],traversal='level')
 
   searchSpace$TreeRoot$Set(tthm=NPs,traversal='level')
+
+
   collapsibleTree(searchSpace$TreeRoot,
                   nodeSize = 'size',
                   fill = 'Colors',
@@ -523,15 +536,10 @@ CELLector.visualiseSearchingSpace<-function(searchSpace,CLdata=NULL){
                   tooltipHtml = 'tthm',
                   attribute = 'RelatesToFatherAs')
 
-
-
-
-
 }
-
 CELLector.visualiseSearchingSpace_sunBurst<-function(searchSpace){
 
-  SBF<-CELLEctor.sunBurstFormat(searchSpace = searchSpace)
+  SBF<-sunBurstFormat(searchSpace = searchSpace)
 
   sequences<-SBF
   tmpCol <- Get(Traverse(searchSpace$TreeRoot,traversal = 'level'),'Colors')
@@ -556,11 +564,15 @@ CELLector.visualiseSearchingSpace_sunBurst<-function(searchSpace){
 
   colors <- list(
     domain=c('0 TOTAL',names(tmpCol),stpes),
-    range=c('lightgray',ttmp,rep('white',length(stpes)))
+    range=c('white',ttmp,rep('white',length(stpes)))
   )
 
+
+
+  #sunburst(SBF,percent = TRUE,count = FALSE,colors=colors)
+
   htmlwidgets::onRender(
-    sunburst(SBF,breadcrumb = list(w = 400),percent = FALSE,count = FALSE,colors=colors,
+    sunburst(SBF,percent = FALSE,count = FALSE,colors=colors,
 
              explanation = "function(d) {     var ssr = d.data.name
              if (!ssr.match(/Others/gi)){
@@ -574,8 +586,6 @@ CELLector.visualiseSearchingSpace_sunBurst<-function(searchSpace){
     "
     )
 }
-
-
 CELLector.selectionVisit<-function(TAV){
   reducedTab<-TAV[,c(1,4,5,10,11)]
   currentNode<-1
@@ -605,7 +615,31 @@ CELLector.selectionVisit<-function(TAV){
   }
   return(pile)
 }
-CELLEctor.sunBurstFormat<-function(searchSpace){
+CELLector.changeSScolors<-function(searchSpace){
+  CC <- colors(distinct = TRUE)
+  CC <- CC[setdiff(1:length(CC),c(grep('gray',CC),'black'))]
+  CC <- rgb(t(col2rgb(CC)),maxColorValue = 255)
+
+  COLORSbyLev <- CC[sample(length(CC))][1:searchSpace$TreeRoot$totalCount]
+
+  names(COLORSbyLev)<-names(Get(Traverse(searchSpace$TreeRoot),'Names'))
+  searchSpace$TreeRoot$Set(Colors=COLORSbyLev,traversal = 'level')
+
+  treeLabels<-unlist(lapply(str_split(Get(Traverse(searchSpace$TreeRoot,'level'),'name'),'[(]'),
+                            function(x){x[1]}))
+
+  nodeIdx<-as.numeric(unlist(lapply(str_split(treeLabels,' '),function(x){x[1]})))
+
+  COLORS<-rep(NA,length(nodeIdx))
+  COLORS[nodeIdx]<-COLORSbyLev
+
+  searchSpace$COLORS<-COLORS
+
+  return(searchSpace)
+}
+
+## not Exported functions
+sunBurstFormat<-function(searchSpace){
   table_tree<-data.frame(lapply(searchSpace$navTable[,1:11], as.character), stringsAsFactors=FALSE)
 
   table_tree$Left.Child.Index[table_tree$Left.Child.Index==0]<- -1
@@ -642,7 +676,7 @@ CELLEctor.sunBurstFormat<-function(searchSpace){
                          leaves[i],
                          CurrentTotal,
                          CurrentTotal,
-                                     1,
+                         1,
                          CurrentTotal/as.numeric(stable_tree$CurrentTotal[1]),0,0))
     stable_tree$Right.Child.Index[leaves[i]]<-nrow(stable_tree)
   }
@@ -666,7 +700,6 @@ CELLEctor.sunBurstFormat<-function(searchSpace){
       }
       if(currentNode!=1){
         edgeList<-c(edgeList,as.numeric(c(stable_tree$Parent.Idx[startingNode],currentNode)))
-        #print(c(stable_tree$Parent.Idx[startingNode],currentNode))
       }
     }
   }
@@ -682,8 +715,12 @@ CELLEctor.sunBurstFormat<-function(searchSpace){
 
     currentId<-as.numeric(paths[[i]][length(paths[[i]])])
 
+    currentItemDec<-stable_tree$ItemsDecoded[as.numeric(as.character(paths[[i]]))]
 
-    chainP[i]<-paste(paste(as.numeric(paths[[i]])-1,stable_tree$ItemsDecoded[as.numeric(as.character(paths[[i]]))]),
+    currentItemDec<-unlist(lapply(str_split(currentItemDec,'[(]'),
+                              function(x){x[1]}))
+
+    chainP[i]<-paste(paste(as.numeric(paths[[i]])-1,currentItemDec),
                      collapse='-')
 
     npat[i]<-as.numeric(stable_tree$AbsSupport[currentId])
@@ -696,8 +733,6 @@ CELLEctor.sunBurstFormat<-function(searchSpace){
   return(sequences)
 
 }
-
-## not Exported functions
 createHtmlNodeProperties<-function(LocalSearchSpace,CLdataset=NULL){
 
   tree<-LocalSearchSpace$TreeRoot
