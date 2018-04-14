@@ -1,0 +1,168 @@
+---
+title: "CELLector: Genomics Guided Selection of Cancer in vitro models"
+author: "Hanna najgenbaur and Francesco Iorio"
+date: "`r Sys.Date()`"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Vignette Title}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r setup, include = FALSE}
+knitr::opts_chunk$set(collapse = TRUE, comment = "#>")
+```
+
+CELLector is a computational tool to assist the selection of the most relevant cancer cell lines to be included in a new in-vitro study (or to be considered in a retrospective study) in a genomic-guided fashion. CELLector combines methods from graph theory and market basket analysis; it leverages tumour genomics data to explore, rank, and select optimal cell line models in a user-friendly way, enabling scientists to make appropriate and informed choices about model inclusion/exclusion in retrospective analyses and future studies. Additionally, it allows the selection of models within user-defined contexts, for example, by focusing on genomic alterations occurring in biological pathways of interest or considering only predetermined sub-cohorts of cancer patients. Finally, CELLector identifies combinations of molecular alterations underlying disease subtypes currently lacking representative cell lines, providing guidance for the future development of new cancer models.\
+
+License: MIT
+
+## Running Modalities
+
+CELLector can be used in three different modalities: (i) as an R package (within R, code available at: https://github.com/francescojm/CELLector), (ii) as an online R shiny App (available at: https://ot-cellector.shinyapps.io/cellector_app/ - temporary deployment), (iii) running the R shiny App locally (within Rstudio, code available at: https://github.com/francescojm/CELLector_App).
+
+
+## R package: quick start
+
+### Package installation
+
+To R package is available on github at https://github.com/francescojm/CELLector. We rocommend to use it within Rstudio (https://www.rstudio.com/). To install it the following commands should be executed:
+
+```{r, fig.show='hold', eval=FALSE}
+library(devtools)
+install_github("Francescojm/CELLector")
+library(CELLector)
+```
+
+This will install the following additional libraries
+```{r, fig.show='hold', eval=FALSE}
+arules, dplyr, stringr, data.tree, sunburstR, igraph, collapsibleTree, methods
+```
+
+all publicly available on CRAN or Bioconductor.
+The package comes with built-in data objects containing genomic data for large cohorts of primary tumours and cancer cell lines (from Iorio et al, Cell 2016).
+
+Full documentation of the package available at: https://github.com/najha/CELLector/blob/master/CELLector.pdf
+
+### Selecting Colorectal Cancer Cell Lines that are representative of a defined patients' sub-group
+
+In this simple example, we want to select the 5 most clinically relevant in vitro models that best represent the genomic diversity of TP53 mutated colorectal tumours. The models we wish to select should be microsatellite stable and harbour at least one alteration in the following signalling pathways: PI3K-AKT-MTOR signalling, RAS-RAF-MEK-ERK/JNK signalling and WNT signalling. Finally, we want the model selection to be guided based on somatic mutations and copy number alterations that are prevalent in at least 3% of the studied TP53 mutant tumour cohort.
+
+After loading the package, we need to load the following data objects
+
+```{r, fig.show='hold', eval=TRUE, echo=TRUE, message=FALSE, warning=FALSE}
+library(CELLector)
+
+## Somatic mutations and copy number alterations found in primary tumours and cell lines
+data(CELLector.PrimTum.BEMs)
+data(CELLector.CellLine.BEMs)
+
+## Sets of Cancer Functional Events (CFEs: somatic mutations and copy number alterations) involving
+## genes in predefined key cancer pathways
+data(CELLector.Pathway_CFEs)
+
+## Objects used for decoding cna CFEs identifiers 
+data(CELLector.CFEs.CNAid_mapping)
+data(CELLector.CFEs.CNAid_decode)
+```
+
+Subsequently we specify the Colon/Rectal Adenocarcinoma (COREAD) TCGA label to select the cancer type to analyse. Other available cancer types in this version of the package are: BLCA, BRCA, COREAD, GBM, HNSC, KIRC, LAML, LGG, LUAD, LUSC, OV, PRAD, SKCM, STAD, THCA, UCEC. Finally we remove possible sample identifier duplications from the primary tumour dataset.
+
+```{r, fig.show='hold'}
+### Change the following two lines to work with a different cancer type
+tumours_BEM<-CELLector.PrimTum.BEMs$COREAD
+CELLlineData<-CELLector.CellLine.BEMs$COREAD
+
+
+### unicize the sample identifiers for the tumour data
+tumours_BEM<-CELLector.unicizeSamples(tumours_BEM)
+```
+
+At this point, we are ready to build the CELLector searching space, which will contain the most recurrent patients subtypes with matched signatures of CFEs. The value of the arguments of the below function specify that we want to look only at TP53 wild-type cancer patients, with alterations in genes belonging to three different cancer pathways.
+
+```{r, fig.show='hold'}
+### building a CELLector searching space focusing on three pathways
+### and TP53 wild-type patients only
+CSS<-CELLector.Build_Search_Space(ctumours = t(tumours_BEM),
+                                  verbose = FALSE,
+                                  minGlobSupp = 0.03,
+                                  cancerType = 'COREAD',
+                                  pathwayFocused = c("RAS-RAF-MEK-ERK / JNK signaling",
+                                                     "PI3K-AKT-MTOR signaling",
+                                                     "WNT signaling"),
+                                  pathway_CFEs = CELLector.Pathway_CFEs,
+                                  cnaIdMap = CELLector.CFEs.CNAid_mapping,
+                                  cnaIdDecode = CELLector.CFEs.CNAid_decode,
+                                  cdg = CELLector.HCCancerDrivers,
+                                  subCohortDefinition='TP53')
+```
+
+The searching space is stored in a list, whose element can be inspected as follows:
+
+```{r, fig.show='hold'}
+### visualising the CELLector searching space as a binary tree
+CSS$TreeRoot
+
+### visualising the first attributes of the tree nodes
+CSS$navTable[,1:11]
+
+### visualising the sub-cohort of patients whose genome satisfies the rule of the 4th node
+str_split(CSS$navTable$positivePoints[4],',')
+
+```
+
+The searching space can be also interactively explored as a collapsible three or a sunburst.
+
+```{r, fig.show='hold',fig.width=8,fig.height=5}
+### visualising the CELLector searching space as a binary tree
+CELLector.visualiseSearchingSpace(searchSpace = CSS,CLdata = CELLlineData)
+
+```
+
+```{r, fig.show='hold',fig.width=6,fig.height=6}
+### visualising the CELLector searching space as a binary tree
+CELLector.visualiseSearchingSpace_sunBurst(searchSpace = CSS)
+
+```
+
+
+## Styles
+
+The `html_vignette` template includes a basic CSS theme. To override this theme you can specify your own CSS in the document metadata as follows:
+
+    output: 
+      rmarkdown::html_vignette:
+        css: mystyles.css
+
+## Figures
+
+The figure sizes have been customised so that you can easily put two images side-by-side. 
+
+```{r, fig.show='hold', echo=FALSE, eval=FALSE}
+plot(1:10)
+plot(10:1)
+```
+
+
+
+
+You can enable figure captions by `fig_caption: yes` in YAML:
+
+    output:
+      rmarkdown::html_vignette:
+        fig_caption: yes
+
+Then you can use the chunk option `fig.cap = "Your figure caption."` in **knitr**.
+
+## More Examples
+
+You can write math expressions, e.g. $Y = X\beta + \epsilon$, footnotes^[A footnote here.], and tables, e.g. using `knitr::kable()`.
+
+```{r, echo=FALSE, results='asis'}
+knitr::kable(head(mtcars, 10))
+```
+
+Also a quote using `>`:
+
+> "He who gives up [code] safety for [code] speed deserves neither."
+([via](https://twitter.com/hadleywickham/status/504368538874703872))
