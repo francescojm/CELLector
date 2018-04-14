@@ -13,12 +13,6 @@ A data frame mapping chromosomal regions of recurrent copy number amplifications
   TCGA labels). The entry in position \emph{i,j} contains the identifier of the \emph{i}th PanCancer RACS in the context of the \emph{j}th
   cancer type (where available).
 }
-\details{
-%%  ~~ If necessary, more details than the __description__ above ~~
-}
-\source{
-%%  ~~ reference to a publication or URL from which the data were obtained ~~
-}
 \references{
 [1] Iorio, F. et al. A Landscape of Pharmacogenomic Interactions in Cancer. Cell 166, 740–754 (2016).
 

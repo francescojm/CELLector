@@ -97,6 +97,7 @@ and as a \emph{navigable table}: a data frame with a row for each node of the tr
   \item{\code{currentPoints}}{The identifiers of the patients in the sub-population under consideration at the iteration time of the node inclusion in the tree}
   \item{\code{currentFeatures}}{The CFEs considered at the at the iteration time of the node inclusion in the tree}
   \item{\code{positivePoints}}{The identifiers of the patients satisfying the node rule}
+  \item{\code{COLORS}}{A vector of strings containing hexadecimal color identifiers: one for each node. These are used by the visualisation functions (\code{CELLector.visualiseSearchingSpace}, and \code{CELLector.visualiseSearchingSpace_sunBurst}}, and can be changed using the \code{CELLector.changeSScolors} function.
 }
 
 }
@@ -113,11 +114,21 @@ https://doi.org/10.1101/275032
 Hanna Najgebauer and Francesco Iorio
 }
 \seealso{
-\code{\link{CELLector.PrimTum.BEMs}}, \code{\link{CELLector.Pathway_CFEs}},
+\code{\link{CELLector.PrimTum.BEMs}},
 
-\code{\link{CELLector.CFEs.CNAid_mapping}}, \code{\link{CELLector.CFEs.CNAid_decode}},
+\code{\link{CELLector.Pathway_CFEs}},
 
-\code{\link{CELLector.HCCancerDrivers}}
+\code{\link{CELLector.CFEs.CNAid_mapping}},
+
+\code{\link{CELLector.CFEs.CNAid_decode}},
+
+\code{\link{CELLector.HCCancerDrivers}},
+
+\code{\link{CELLector.visualiseSearchingSpace}},
+
+\code{\link{CELLector.visualiseSearchingSpace_sunBurst}},
+
+\code{\link{CELLector.changeSScolors}}
 }
 \examples{
 data(CELLector.PrimTum.BEMs)

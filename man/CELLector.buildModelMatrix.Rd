@@ -44,7 +44,7 @@ Hanna Najgebauer and Francesco Iorio
 
 \code{\link{CELLector.CellLine.BEMs}},
 
-\code{\link{CELLector.Build_Search_Space function}}
+\code{\link{CELLector.Build_Search_Space}}
 }
 \examples{
 

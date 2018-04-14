@@ -39,7 +39,7 @@ This table is used by the \code{\link{CELLector.cna_look_up}} function to decode
 }
 \examples{
 data(CELLector.CFEs.CNAid_decode)
-haed(CELLector.CFEs.CNAid_decode)
+head(CELLector.CFEs.CNAid_decode)
 
 data(CELLector.CellLine.BEMs)
 colnames(CELLector.CellLine.BEMs$COREAD)[8]

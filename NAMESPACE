@@ -1,7 +1,17 @@
 import(arules)
+import(igraph)
+import(stringr)
+import(data.tree)
+import(grDevices)
+
+importFrom("methods", "as")
+importFrom("stats", "start")
+
+import(collapsibleTree)
+import(dplyr)
+import(sunburstR)
 
 
-## documented
 export(CELLector.cna_look_up)
 export(CELLector.mostSupported_CFEs)
 export(CELLector.Build_Search_Space)
@@ -10,11 +20,9 @@ export(CELLector.createAllSignatures)
 export(CELLector.solveFormula)
 export(CELLector.buildModelMatrix)
 export(CELLector.makeSelection)
-export(CELLector.visualiseSearchingSpace)
-export(CELLector.changeSScolors)
-
-## not documented, used by the app
 export(CELLector.selectionVisit)
-
+export(CELLector.changeSScolors)
+export(CELLector.visualiseSearchingSpace)
+export(CELLector.visualiseSearchingSpace_sunBurst)
 exportPattern("^[[:alpha:]]+")
 

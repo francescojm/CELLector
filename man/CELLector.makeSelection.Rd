@@ -92,7 +92,7 @@ CSS<-CELLector.Build_Search_Space(ctumours = t(tumours_BEM),
 Signatures <- CELLector.createAllSignatures(CSS$navTable)
 
 ### mapping the cell lines on the CELLector searching space
-ModelMat<-CELLector.buildModelMatrix(Signatures,CELLlineData,CSS$navTable)
+ModelMat<-CELLector.buildModelMatrix(Signatures$ES,CELLlineData,CSS$navTable)
 
 
 ### selecting 10 cell lines
