@@ -13,20 +13,28 @@ vignette: >
 knitr::opts_chunk$set(collapse = TRUE, comment = "#>")
 ```
 
-CELLector is a computational tool to assist the selection of the most relevant cancer cell lines to be included in a new in-vitro study (or to be considered in a retrospective study) in a genomic-guided fashion. CELLector combines methods from graph theory and market basket analysis; it leverages tumour genomics data to explore, rank, and select optimal cell line models in a user-friendly way, enabling scientists to make appropriate and informed choices about model inclusion/exclusion in retrospective analyses and future studies. Additionally, it allows the selection of models within user-defined contexts, for example, by focusing on genomic alterations occurring in biological pathways of interest or considering only predetermined sub-cohorts of cancer patients. Finally, CELLector identifies combinations of molecular alterations underlying disease subtypes currently lacking representative cell lines, providing guidance for the future development of new cancer models.\
+CELLector is a computational tool to assist the selection of the most relevant cancer cell lines to be included in a new in-vitro study (or to be considered in a retrospective study) in a genomic-guided fashion. CELLector combines methods from graph theory and market basket analysis; it leverages tumour genomics data to explore, rank, and select optimal cell line models in a user-friendly way, enabling scientists to make appropriate and informed choices about model inclusion/exclusion in retrospective analyses and future studies. Additionally, it allows the selection of models within user-defined contexts, for example, by focusing on genomic alterations occurring in biological pathways of interest or considering only predetermined sub-cohorts of cancer patients. Finally, CELLector identifies combinations of molecular alterations underlying disease subtypes currently lacking representative cell lines, providing guidance for the future development of new cancer models.
 
 License: MIT
+
+Najgebauer, H., Yang, M., Francies, H., Stronach, E. A., Garnett, M. J., Saez-Rodriguez, J., & Iorio, F. (n.d.). CELLector: Genomics Guided Selection of Cancer in vitro Models. http://doi.org/10.1101/275032
 
 ## Running Modalities
 
 CELLector can be used in three different modalities: (i) as an R package (within R, code available at: https://github.com/francescojm/CELLector), (ii) as an online R shiny App (available at: https://ot-cellector.shinyapps.io/cellector_app/ - temporary deployment), (iii) running the R shiny App locally (within Rstudio, code available at: https://github.com/francescojm/CELLector_App).
+
+This page contains instruction to quickly try the package. User manual and extensive documentation are available at
+https://github.com/najha/CELLector/blob/master/CELLector.pdf.
+
+A tutorial on how to use the online Rshiny app (containing also instruction on how to run it locally) is available here:
+
 
 
 ## R package: quick start
 
 ### Package installation
 
-To R package is available on github at https://github.com/francescojm/CELLector. We rocommend to use it within Rstudio (https://www.rstudio.com/). To install it the following commands should be executed:
+To R package is available on github at https://github.com/francescojm/CELLector. We recommend to use it within Rstudio (https://www.rstudio.com/). To install it the following commands should be executed:
 
 ```{r, fig.show='hold', eval=FALSE}
 library(devtools)
@@ -42,7 +50,7 @@ arules, dplyr, stringr, data.tree, sunburstR, igraph, collapsibleTree, methods
 all publicly available on CRAN or Bioconductor.
 The package comes with built-in data objects containing genomic data for large cohorts of primary tumours and cancer cell lines (from Iorio et al, Cell 2016).
 
-Full documentation of the package available at: https://github.com/najha/CELLector/blob/master/CELLector.pdf
+
 
 ### Selecting Colorectal Cancer Cell Lines that are representative of a defined patients' sub-group
 
@@ -122,47 +130,25 @@ CELLector.visualiseSearchingSpace(searchSpace = CSS,CLdata = CELLlineData)
 ```{r, fig.show='hold',fig.width=6,fig.height=6}
 ### visualising the CELLector searching space as a binary tree
 CELLector.visualiseSearchingSpace_sunBurst(searchSpace = CSS)
+```
 
+Finally 10 of the most representative cell lines can be selected with the following command:
+
+```{r, fig.show='hold',fig.width=6,fig.height=6}
+### take all the signatures from the searching space
+Signatures <- CELLector.createAllSignatures(CSS$navTable)
+
+### mapping the cell lines on the CELLector searching space
+ModelMat<-CELLector.buildModelMatrix(Signatures$ES,CELLlineData,CSS$navTable)
+
+
+### selecting 10 cell lines
+selectedCellLines<-CELLector.makeSelection(modelMat = ModelMat,
+                                           n=10,
+                                           searchSpace = CSS$navTable)
+
+knitr::kable(selectedCellLines,align = 'l')
 ```
 
 
-## Styles
 
-The `html_vignette` template includes a basic CSS theme. To override this theme you can specify your own CSS in the document metadata as follows:
-
-    output: 
-      rmarkdown::html_vignette:
-        css: mystyles.css
-
-## Figures
-
-The figure sizes have been customised so that you can easily put two images side-by-side. 
-
-```{r, fig.show='hold', echo=FALSE, eval=FALSE}
-plot(1:10)
-plot(10:1)
-```
-
-
-
-
-You can enable figure captions by `fig_caption: yes` in YAML:
-
-    output:
-      rmarkdown::html_vignette:
-        fig_caption: yes
-
-Then you can use the chunk option `fig.cap = "Your figure caption."` in **knitr**.
-
-## More Examples
-
-You can write math expressions, e.g. $Y = X\beta + \epsilon$, footnotes^[A footnote here.], and tables, e.g. using `knitr::kable()`.
-
-```{r, echo=FALSE, results='asis'}
-knitr::kable(head(mtcars, 10))
-```
-
-Also a quote using `>`:
-
-> "He who gives up [code] safety for [code] speed deserves neither."
-([via](https://twitter.com/hadleywickham/status/504368538874703872))
