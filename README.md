@@ -1,6 +1,7 @@
 # CELLector: Genomics Guided Selection of Cancer in vitro models
 
-[logo]: https://github.com/najha/CELLector_App/blob/master/www/cellcultures.jpg "Logo Title Text 2"
+
+![alt text](https://github.com/najha/CELLector_App/blob/master/www/cellcultures.jpg)
 
 Najgebauer, H., Yang, M., Francies, H., Stronach, E. A., Garnett, M. J., Saez-Rodriguez, J., & Iorio, F. (n.d.). CELLector: Genomics Guided Selection of Cancer in vitro Models. http://doi.org/10.1101/275032
 
