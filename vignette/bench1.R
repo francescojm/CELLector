@@ -1,3 +1,10 @@
+library(CELLector)
+data(CELLector.PrimTum.BEMs)
+data(CELLector.Pathway_CFEs)
+data(CELLector.CFEs.CNAid_mapping)
+data(CELLector.CFEs.CNAid_decode)
+data(CELLector.HCCancerDrivers)
+data(CELLector.CellLine.BEMs)
 
 
 tumours_BEM<-CELLector.PrimTum.BEMs$COREAD
@@ -12,15 +19,58 @@ CSS<-CELLector.Build_Search_Space(ctumours = t(tumours_BEM),
                                   minGlobSupp = 0.05,
                                   cancerType = 'COREAD',
                                   pathway_CFEs = CELLector.Pathway_CFEs,
-                                  cnaIdMap = CELLector.CFEs.CNAid_mapping,
+                                  cnaIdMap = CELLector.CFEs.CNAid_mapping,mutOnly = FALSE,
                                   cnaIdDecode = CELLector.CFEs.CNAid_decode,
                                   cdg = CELLector.HCCancerDrivers)
+CELLector.visualiseSearchingSpace(searchSpace = CSS,CLdata = CELLlineData)
 
+CELLector.visualiseSearchingSpace_sunBurst(searchSpace = CSS)
 
 Signatures<-CELLector.createAllSignatures(CSS$navTable)
 modelMatrix<-CELLector.buildModelMatrix(Sigs = Signatures$ES,dataset = CELLlineData,searchSpace = CSS$navTable)
 
-CELLector.visualiseSearchingSpace(searchSpace = CSS,CLdata = CELLlineData)
+
+
+
+SBF<-CELLEctor.sunBurstFormat(searchSpace = CSS)
+
+
+
+sequences <- SBF
+
+tmpCol <- Get(Traverse(CSS$TreeRoot,traversal = 'level'),'Colors')
+ttmp<-tmpCol
+
+names(ttmp)<-NULL
+
+nvoid<-grep('Others',unique(unlist(strsplit(sequences$V1,'-'))),value = TRUE)
+
+stpes<-nvoid
+
+colors <- list(
+  domain=c('0 TOTAL',names(tmpCol),stpes),
+  range=c('lightgray',ttmp,rep('white',length(stpes)))
+)
+
+
+
+htmlwidgets::onRender(
+  sunburst(sequences,breadcrumb = list(w = 400),percent = TRUE,count = FALSE,colors=colors,
+
+           explanation = "function(d) {     var ssr = d.data.name
+           if (!ssr.match(/Others/gi)){
+           return ssr
+           }
+           }"),
+        "
+  function(el,x){
+  d3.select(el).select('.sunburst-sidebar').remove()
+  }
+  "
+  )
+
+
+
 
 CELLector.solveFormula('~APC BRAF',dataset = CELLlineData)
 

@@ -237,6 +237,16 @@ CELLector.Build_Search_Space<-function(ctumours,
     nROOT<-NULL
   }
 
+  CC <- colors(distinct = TRUE)
+  CC <- CC[setdiff(1:length(CC),c(grep('gray',CC),'black'))]
+  CC <- rgb(t(col2rgb(CC)),maxColorValue = 255)
+
+  COLORSbyLev <- CC[sample(length(CC))][1:nROOT$totalCount]
+
+  names(COLORSbyLev)<-names(Get(Traverse(nROOT),'Names'))
+  nROOT$Set(Colors=COLORSbyLev,traversal = 'level')
+
+
   return(list(navTable=NT,TreeRoot=nROOT))
 }
 
@@ -480,12 +490,10 @@ CELLector.makeSelection<-function(modelMat,n,searchSpace){
                   stringsAsFactors = FALSE)
   return(RES)
 }
-CELLector.visualiseSearchingSpace<-function(searchSpace,CLdata=NULL){
-  CC <- colors(distinct = TRUE)
-  CC <- CC[setdiff(1:length(CC),grep('gray',CC))]
-  CC <- rgb(t(col2rgb(CC)),maxColorValue = 255)
 
-  COLORSbyLev <- CC[sample(length(CC))][1:searchSpace$TreeRoot$totalCount]
+
+## Other Exported functions
+CELLector.visualiseSearchingSpace<-function(searchSpace,CLdata=NULL){
 
   RelatesToFatherAs <- rep('-',searchSpace$TreeRoot$totalCount)
   RelatesToFatherAs[which(Get(Traverse(searchSpace$TreeRoot,traversal = 'level'),
@@ -493,7 +501,6 @@ CELLector.visualiseSearchingSpace<-function(searchSpace,CLdata=NULL){
   RelatesToFatherAs[which(Get(Traverse(searchSpace$TreeRoot,traversal = 'level'),
                               attribute = 'NodeType')=='Left.Child')]<-'Refinement'
 
-  searchSpace$TreeRoot$Set(Colors=COLORSbyLev,traversal = 'level')
   searchSpace$TreeRoot$Set(RelatesToFatherAs=RelatesToFatherAs,traversal = 'level')
 
 
@@ -502,19 +509,19 @@ CELLector.visualiseSearchingSpace<-function(searchSpace,CLdata=NULL){
 
 
   NPs<-createHtmlNodeProperties(LocalSearchSpace = searchSpace,
-                                 CLdataset = CLdata)
+                                CLdataset = CLdata)
 
   searchSpace$TreeRoot$Set(size=searchSpace$navTable$GlobalSupport[levelVisitOrder],traversal = 'level')
   #searchSpace$TreeRoot$Set(tthm=NPs[levelVisitOrder],traversal='level')
 
   searchSpace$TreeRoot$Set(tthm=NPs,traversal='level')
   collapsibleTree(searchSpace$TreeRoot,
-                   nodeSize = 'size',
-                   fill = 'Colors',
-                   inputId = 'searchSpace',
-                   tooltip = TRUE,
-                   tooltipHtml = 'tthm',
-                   attribute = 'RelatesToFatherAs')
+                  nodeSize = 'size',
+                  fill = 'Colors',
+                  inputId = 'searchSpace',
+                  tooltip = TRUE,
+                  tooltipHtml = 'tthm',
+                  attribute = 'RelatesToFatherAs')
 
 
 
@@ -522,7 +529,53 @@ CELLector.visualiseSearchingSpace<-function(searchSpace,CLdata=NULL){
 
 }
 
-## Other Exported functions
+CELLector.visualiseSearchingSpace_sunBurst<-function(searchSpace){
+
+  SBF<-CELLEctor.sunBurstFormat(searchSpace = searchSpace)
+
+  sequences<-SBF
+  tmpCol <- Get(Traverse(searchSpace$TreeRoot,traversal = 'level'),'Colors')
+  ttmp<-tmpCol
+
+     names(ttmp)<-NULL
+
+     nvoid<-grep('Others',unique(unlist(strsplit(sequences$V1,'-'))),value = TRUE)
+
+     stpes<-nvoid
+
+     colors <- list(
+       domain=c('0 TOTAL',names(tmpCol),stpes),
+       range=c('black',ttmp,rep('white',length(stpes)))
+     )
+
+  names(ttmp)<-NULL
+
+  nvoid<-grep('Others',unique(unlist(strsplit(SBF$V1,'-'))),value = TRUE)
+
+  stpes<-nvoid
+
+  colors <- list(
+    domain=c('0 TOTAL',names(tmpCol),stpes),
+    range=c('lightgray',ttmp,rep('white',length(stpes)))
+  )
+
+  htmlwidgets::onRender(
+    sunburst(SBF,breadcrumb = list(w = 400),percent = FALSE,count = FALSE,colors=colors,
+
+             explanation = "function(d) {     var ssr = d.data.name
+             if (!ssr.match(/Others/gi)){
+             return ssr
+             }
+}"),
+        "
+    function(el,x){
+    d3.select(el).select('.sunburst-sidebar').remove()
+    }
+    "
+    )
+}
+
+
 CELLector.selectionVisit<-function(TAV){
   reducedTab<-TAV[,c(1,4,5,10,11)]
   currentNode<-1
@@ -552,7 +605,97 @@ CELLector.selectionVisit<-function(TAV){
   }
   return(pile)
 }
+CELLEctor.sunBurstFormat<-function(searchSpace){
+  table_tree<-data.frame(lapply(searchSpace$navTable[,1:11], as.character), stringsAsFactors=FALSE)
 
+  table_tree$Left.Child.Index[table_tree$Left.Child.Index==0]<- -1
+  table_tree$Right.Child.Index[table_tree$Right.Child.Index==0]<- -1
+
+  table_tree<-rbind(c(0,'TOTAL','TOTAL','root','-1',table_tree$CurrentTotal[1],table_tree$CurrentTotal[1],1,1,0),table_tree)
+  table_tree$Type[2]<-'Left.Child'
+
+  table_tree$Left.Child.Index[1]<-1
+  table_tree$Right.Child.Index[1]<- -1
+
+  table_tree$Idx<-as.numeric(table_tree$Idx)+1
+  table_tree$Parent.Idx<-as.numeric(table_tree$Parent.Idx)+1
+  table_tree$Left.Child.Index<-as.numeric(table_tree$Left.Child.Index)+1
+  table_tree$Right.Child.Index<-as.numeric(table_tree$Right.Child.Index)+1
+
+  leaves<-which(table_tree$Right.Child.Index==0)
+  leaves<-leaves[-1]
+
+  stable_tree<-table_tree
+
+  for (i in 1:length(leaves)){
+
+    CurrentTotal<-as.numeric(table_tree$CurrentTotal[leaves[i]])-
+      as.numeric(table_tree$AbsSupport[leaves[i]])
+
+
+
+    stable_tree<-rbind(stable_tree,
+                       c(nrow(stable_tree)+1,
+                         'Others',
+                         'Others',
+                         'Right.Child',
+                         leaves[i],
+                         CurrentTotal,
+                         CurrentTotal,
+                                     1,
+                         CurrentTotal/as.numeric(stable_tree$CurrentTotal[1]),0,0))
+    stable_tree$Right.Child.Index[leaves[i]]<-nrow(stable_tree)
+  }
+
+
+  nnodes<-nrow(stable_tree)
+  edgeList<-NULL
+
+  for (i in 1:nnodes){
+
+    currentNode<-i
+
+    if (stable_tree$Type[currentNode]=='Left.Child'){
+      edgeList<-c(edgeList,as.numeric(c(stable_tree$Parent.Idx[currentNode],stable_tree$Idx[currentNode])))
+      #  print(c(stable_tree$Parent.Idx[currentNode],stable_tree$Idx[currentNode]))
+    }else{
+      startingNode<-currentNode
+      while (stable_tree$Type[startingNode]=='Right.Child'){
+        startingNode<-as.numeric(stable_tree$Parent.Idx[startingNode])
+
+      }
+      if(currentNode!=1){
+        edgeList<-c(edgeList,as.numeric(c(stable_tree$Parent.Idx[startingNode],currentNode)))
+        #print(c(stable_tree$Parent.Idx[startingNode],currentNode))
+      }
+    }
+  }
+
+  G<-make_graph(edgeList)
+  leaves<-V(G)[which(degree(G,v=V(G),'out')==0)]
+  paths<-all_simple_paths(G,1,leaves)
+  nleaves<-length(paths)
+
+  chainP<-vector()
+  npat<-vector()
+  for (i in 1:nleaves){
+
+    currentId<-as.numeric(paths[[i]][length(paths[[i]])])
+
+
+    chainP[i]<-paste(paste(as.numeric(paths[[i]])-1,stable_tree$ItemsDecoded[as.numeric(as.character(paths[[i]]))]),
+                     collapse='-')
+
+    npat[i]<-as.numeric(stable_tree$AbsSupport[currentId])
+  }
+
+  sequences<-data.frame(V1=chainP,V2=npat,stringsAsFactors = FALSE)
+
+
+
+  return(sequences)
+
+}
 
 ## not Exported functions
 createHtmlNodeProperties<-function(LocalSearchSpace,CLdataset=NULL){
