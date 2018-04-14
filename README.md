@@ -21,4 +21,4 @@ CELLector can be used in three different modalities:
 
 http://rpubs.com/francescojm/CELLector
 
-https://github.com/najha/CELLector/blob/master/www/preview1.png
+![alt text](www/preview1.png)
