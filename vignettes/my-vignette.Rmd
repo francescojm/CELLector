@@ -86,11 +86,11 @@ CELLlineData<-CELLector.CellLine.BEMs$COREAD
 tumours_BEM<-CELLector.unicizeSamples(tumours_BEM)
 ```
 
-At this point, we are ready to build the CELLector searching space, which will contain the most recurrent patients subtypes with matched signatures of CFEs. The value of the arguments of the below function specify that we want to look only at TP53 wild-type cancer patients, with alterations in genes belonging to three different cancer pathways.
+At this point, we are ready to build the CELLector searching space, which will contain the most recurrent patients subtypes with matched signatures of CFEs. The value of the arguments of the below function specify that we want to look only at TP53 mutant cancer patients, with alterations in genes belonging to three different cancer pathways.
 
 ```{r, fig.show='hold'}
 ### building a CELLector searching space focusing on three pathways
-### and TP53 wild-type patients only
+### and TP53 mutant patients only
 CSS<-CELLector.Build_Search_Space(ctumours = t(tumours_BEM),
                                   verbose = FALSE,
                                   minGlobSupp = 0.03,
