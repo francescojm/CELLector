@@ -26,7 +26,8 @@ CELLector can be used in three different modalities: (i) as an R package (within
 This page contains instruction to quickly try the package. User manual and extensive documentation are available at
 https://github.com/najha/CELLector/blob/master/CELLector.pdf.
 
-A tutorial on how to use the online Rshiny app (containing also instruction on how to run it locally) is available here:
+A tutorial on how to use the online Rshiny app (containing also instruction on how to run it locally) is available here: https://www.biorxiv.org/highwire/filestream/92891/field_highwire_adjunct_files/0/275032-1.pdf
+
 
 
 
@@ -54,7 +55,7 @@ The package comes with built-in data objects containing genomic data for large c
 
 ### Selecting Colorectal Cancer Cell Lines that are representative of a defined patients' sub-group
 
-In this simple example, we want to select the 5 most clinically relevant in vitro models that best represent the genomic diversity of TP53 mutated colorectal tumours. The models we wish to select should be microsatellite stable and harbour at least one alteration in the following signalling pathways: PI3K-AKT-MTOR signalling, RAS-RAF-MEK-ERK/JNK signalling and WNT signalling. Finally, we want the model selection to be guided based on somatic mutations and copy number alterations that are prevalent in at least 3% of the studied TP53 mutant tumour cohort.
+In this simple example, we want to select the 5 most clinically relevant in vitro models that best represent the genomic diversity of TP53 mutated colorectal tumours. Additionally, the models that we want to select should be microsatellite stable and harbour at least one alteration in the following pathways: PI3K-AKT-MTOR signalling, RAS-RAF-MEK-ERK/JNK signalling and WNT signalling. Finally, we want the model selection to be guided by the analysis of somatic mutations and copy number alterations that are prevalent in at least 3% of the studied TP53 mutant tumour cohort.
 
 After loading the package, we need to load the following data objects
 
@@ -74,7 +75,7 @@ data(CELLector.CFEs.CNAid_mapping)
 data(CELLector.CFEs.CNAid_decode)
 ```
 
-Subsequently we specify the Colon/Rectal Adenocarcinoma (COREAD) TCGA label to select the cancer type to analyse. Other available cancer types in this version of the package are: BLCA, BRCA, COREAD, GBM, HNSC, KIRC, LAML, LGG, LUAD, LUSC, OV, PRAD, SKCM, STAD, THCA, UCEC. Finally we remove possible sample identifier duplications from the primary tumour dataset.
+Subsequently we specify the Colon/Rectal Adenocarcinoma (COREAD) TCGA label to select the cancer type to analyse. Other available cancer types in this version of the package are: BLCA, BRCA, COREAD, GBM, HNSC, KIRC, LAML, LGG, LUAD, LUSC, OV, PRAD, SKCM, STAD, THCA, UCEC. Finally, we remove possible sample identifier duplications from the primary tumour dataset.
 
 ```{r, fig.show='hold'}
 ### Change the following two lines to work with a different cancer type
@@ -86,7 +87,7 @@ CELLlineData<-CELLector.CellLine.BEMs$COREAD
 tumours_BEM<-CELLector.unicizeSamples(tumours_BEM)
 ```
 
-At this point, we are ready to build the CELLector searching space, which will contain the most recurrent patients subtypes with matched signatures of CFEs. The value of the arguments of the below function specify that we want to look only at TP53 mutant cancer patients, with alterations in genes belonging to three different cancer pathways.
+At this point, we are ready to build the CELLector searching space, which will contain the most recurrent patients subtypes with matched signatures of cancer functional events (CFEs, defined in Iorio et al, Cell 2016). The value of the arguments of the below function specify that we want to look only at TP53 mutant cancer patients, with alterations in genes belonging to three different cancer pathways.
 
 ```{r, fig.show='hold'}
 ### building a CELLector searching space focusing on three pathways
