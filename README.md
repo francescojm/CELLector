@@ -22,10 +22,13 @@ CELLector can be used in three different modalities:
 
 ![alt text](www/preview1.png)
 
+A tutorial on how to use the online Rshiny app (containing also instruction on how to run it locally) is available here: https://www.biorxiv.org/highwire/filestream/92891/field_highwire_adjunct_files/0/275032-1.pdf
+
 
 ## R package: quick start (interactive vignette)
 
 http://rpubs.com/francescojm/CELLector
 
 ![alt text](www/preview2.png)
+
 
