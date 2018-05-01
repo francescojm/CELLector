@@ -21,7 +21,13 @@ Najgebauer, H., Yang, M., Francies, H., Stronach, E. A., Garnett, M. J., Saez-Ro
 
 ## Running Modalities
 
-CELLector can be used in three different modalities: (i) as an R package (within R, code available at: https://github.com/francescojm/CELLector), (ii) as an online R shiny App (available at: https://ot-cellector.shinyapps.io/cellector_app/ - temporary deployment), (iii) running the R shiny App locally (within Rstudio, code available at: https://github.com/francescojm/CELLector_App).
+CELLector can be used in three different modalities:
+
+  - (i) as an R package (within R, code available at: https://github.com/francescojm/CELLector),
+
+  - (ii) as an online R shiny App (available at: http://ot-cellector.shiny.opentargets.io/CELLector_App/), 
+
+  - (iii) running the R shiny App locally (within Rstudio, code available at:   https://github.com/francescojm/CELLector_App).
 
 This page contains instruction to quickly try the package. User manual and extensive documentation are available at
 https://github.com/najha/CELLector/blob/master/CELLector.pdf.
