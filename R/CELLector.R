@@ -48,7 +48,6 @@ CELLector.cna_look_up <- function(cna_ID, cnaId_decode, TCGALabel) {
   return(info)
 
 }
-
 CELLector.Build_Search_Space<-function(ctumours,
                                        cancerType,
                                        minlen=1,
@@ -260,7 +259,6 @@ CELLector.Build_Search_Space<-function(ctumours,
   NT<-cbind(NT,COLORS)
   return(list(navTable=NT,TreeRoot=nROOT))
 }
-
 CELLector.unicizeSamples<-function(ctumours,keepReplicates=TRUE){
   if (keepReplicates){
     colnames(ctumours)<-paste(colnames(ctumours),'_',1:ncol(ctumours),sep='')
@@ -430,7 +428,6 @@ CELLector.buildModelMatrix<-function(Sigs,dataset,searchSpace){
   rownames(modelMatrix)<-as.character(NODEidx)
   return(modelMatrix)
 }
-
 CELLector.makeSelection<-function(modelMat,n,searchSpace){
 
 
@@ -501,9 +498,6 @@ CELLector.makeSelection<-function(modelMat,n,searchSpace){
                   stringsAsFactors = FALSE)
   return(RES)
 }
-
-
-## Other Exported functions
 CELLector.visualiseSearchingSpace<-function(searchSpace,CLdata=NULL){
 
   RelatesToFatherAs <- rep('-',searchSpace$TreeRoot$totalCount)
@@ -545,16 +539,16 @@ CELLector.visualiseSearchingSpace_sunBurst<-function(searchSpace){
   tmpCol <- Get(Traverse(searchSpace$TreeRoot,traversal = 'level'),'Colors')
   ttmp<-tmpCol
 
-     names(ttmp)<-NULL
+  names(ttmp)<-NULL
 
-     nvoid<-grep('Others',unique(unlist(strsplit(sequences$V1,'-'))),value = TRUE)
+  nvoid<-grep('Others',unique(unlist(strsplit(sequences$V1,'-'))),value = TRUE)
 
-     stpes<-nvoid
+  stpes<-nvoid
 
-     colors <- list(
-       domain=c('0 TOTAL',names(tmpCol),stpes),
-       range=c('black',ttmp,rep('white',length(stpes)))
-     )
+  colors <- list(
+    domain=c('0 TOTAL',names(tmpCol),stpes),
+    range=c('black',ttmp,rep('white',length(stpes)))
+  )
 
   names(ttmp)<-NULL
 
@@ -585,7 +579,7 @@ CELLector.visualiseSearchingSpace_sunBurst<-function(searchSpace){
     }
     "
     )
-}
+  }
 CELLector.selectionVisit<-function(TAV){
   reducedTab<-TAV[,c(1,4,5,10,11)]
   currentNode<-1
@@ -637,6 +631,110 @@ CELLector.changeSScolors<-function(searchSpace){
 
   return(searchSpace)
 }
+
+CELLector.Score <- function(NavTab, CELLlineData,alfa=0.75){
+
+  if(alfa>=0 & alfa<=1){
+    beta<-1-alfa
+
+    Signatures <- CELLector.createAllSignatures(NavTab)
+
+    SignaturesES<-Signatures$S
+
+    MODELS<-vector()
+    for(cc in 1:length(Signatures$ES)){
+      solved<-CELLector.solveFormula(Signatures$ES[[cc]],dataset = CELLlineData)
+      MODELS[cc]<-paste(sort(solved$PS),collapse=', ')
+    }
+
+    tabCSS <- cbind(NavTab[ ,c(1,9)], SignaturesES, MODELS)
+
+    SortedSubpop <- CELLector.selectionVisit(TAV = CSS$navTable)
+    tabCSS <- tabCSS[tabCSS$Idx[SortedSubpop],]
+
+    vecSigLength <- c()
+    for(i in 1:length(SignaturesES)){
+      x <- length(unlist(str_split(SignaturesES[i], " ")))
+      vecSigLength[i] <- x
+    }
+    longestSigniture <- max(vecSigLength)
+
+    vecScores <- c()
+    sigLength <- c()
+
+
+    for(g in 1:nrow(tabCSS)){
+
+      signiture_length <- length(unlist(str_split(tabCSS[g,3], " ")))
+      sigLength[g] <- signiture_length
+
+      normalizedSigLenght <- signiture_length/longestSigniture
+
+      CELLectorScore <- alfa*normalizedSigLenght+beta*tabCSS[g,2]
+
+
+
+      CELLectorScore <- alfa*normalizedSigLenght+beta*tabCSS[g,2]
+
+      vecScores[g] <- CELLectorScore
+
+    }
+
+    tabCSS$CELLectorScores <- vecScores
+    tabCSS$SignitureLength <- sigLength
+
+    # Remove Subtypes with no representative cell lines
+    sub_tabCSS <- tabCSS %>% filter(MODELS!="")
+
+    # Deconvolute sub_tabCSS - create table with a cell line per row
+    Score_perCL <- data.frame(matrix(nrow=0, ncol=5))
+    colnames(Score_perCL) <- c("RepCellLines", "Idx GlobalSupport", "SignaturesES", "CELLectorScores", "SignitureLength")
+
+    for(i in 1:nrow(sub_tabCSS)){
+
+      x <- unlist(str_split(sub_tabCSS[i,4], " "))
+      y <- sub_tabCSS[i,c(1,2,3,5,6)]
+      RepCellLines <- gsub("\\,*", "", x)
+      df <- cbind(data.frame(RepCellLines),y, row.names = NULL)
+      Score_perCL <- rbind(Score_perCL, df)
+    }
+
+    ucL<-unique(Score_perCL$RepCellLines)
+
+    Scores<-do.call(rbind,
+            lapply(ucL,function(x){
+              id<-which(Score_perCL$RepCellLines==x)
+              Score_perCL[id[order(Score_perCL$CELLectorScores[id],decreasing = TRUE)[1]],]
+            }))
+
+    Scores<-Scores[order(Scores$CELLectorScores,decreasing = TRUE),]
+    rownames(Scores)<-NULL
+
+    Scores<-data.frame(CellLines=as.character(Scores$RepCellLines),
+                       GlobalSupport=Scores$GlobalSupport,
+                       SignatureLength=as.character(Scores$SignitureLength),
+                       CELLectorScores=Scores$CELLectorScores,
+                       Signature=as.character(Scores$SignaturesES),
+                       stringsAsFactors = FALSE)
+    nonRepCelLines<-as.character(setdiff(as.character(CELLlineData$CellLine),Scores$RepCellLines))
+
+    remainin<-data.frame(CellLines=nonRepCelLines,
+                         GlobalSupport=rep(0,length(nonRepCelLines)),
+                         SignatureLength=rep(0,length(nonRepCelLines)),
+                         CELLectorScores=rep(0,length(nonRepCelLines)),
+                         Signature=rep('-',length(nonRepCelLines)))
+
+     Scores<-rbind(Scores,remainin)
+     return(Scores)
+  }else{
+    print('Error: alfa needs to be >=0 and <=1')
+  }
+
+
+
+}
+
+
 
 ## not Exported functions
 sunBurstFormat<-function(searchSpace){
@@ -910,7 +1008,6 @@ createNode<-function(SystemStack,
     return(NULL)
   }
 }
-
 decodeCNAs<-function(ctype,codedCNA,cnaId_decode,cdg){
   IS<-codedCNA
   icna<-grep('cna',IS)
@@ -951,7 +1048,6 @@ decodeCNAs<-function(ctype,codedCNA,cnaId_decode,cdg){
   #}
   return(IS)
 }
-
 stackPush<-function(SystemStack,node){
   currentLength<-length(SystemStack)
   if(currentLength>0){
@@ -978,7 +1074,6 @@ stackPop<-function(SystemStack){
 
   return(list(nNode=nNode,SYST=SystemStack))
 }
-
 addNodeToNavTable<-function(NavTable,node){
     if(length(NavTable)==0){
       NavTable<-data.frame(c(node[1],paste(node[[5]],collapse=', '),paste(node[[6]],collapse=', '),node[7:12],
@@ -1016,7 +1111,6 @@ addNodeToNavTable<-function(NavTable,node){
 
     return(NavTable)
   }
-
 rightMostPath<-function(Tab,node){
 
   currentNode<-node
@@ -1032,7 +1126,6 @@ rightMostPath<-function(Tab,node){
 
   return(rPath)
 }
-
 leftChildPattern<-function(Tab,nodePattern){
   lc<-Tab[nodePattern,'Left.Child.Index']
   lc<-lc[lc>0]
