@@ -34,230 +34,23 @@ CELLector.cna_look_up <- function(cna_ID, cnaId_decode, TCGALabel) {
 
   if (length(cna_ID) == 1) {
 
-    info <- CancerSpecificData %>% filter(CNA_Identifier == paste0(cna_ID)) %>% select(Identifier, Recurrent, chr, start, stop,
-                                                                                       locus, nGenes, ContainedGenes)
+    info <- CancerSpecificData %>% filter(CNA_Identifier == paste0(cna_ID))
+
+    info <- info[,c('Identifier', 'Recurrent', 'chr', 'start', 'stop',
+                    'locus', 'nGenes', 'ContainedGenes')]
 
 
   } else if (length(cna_ID) > 1) {
 
-    info <- CancerSpecificData %>% filter(CNA_Identifier %in% cna_ID) %>% select(Identifier, Recurrent, chr, start, stop, locus,
-                                                                                 nGenes, ContainedGenes)
+    info <- CancerSpecificData %>% filter(CNA_Identifier %in% cna_ID)
+
+    info <- info[,c('Identifier', 'Recurrent', 'chr', 'start', 'stop',
+                    'locus', 'nGenes', 'ContainedGenes')]
 
   }
 
   return(info)
 
-}
-CELLector.Build_Search_Space<-function(ctumours,
-                                       cancerType,
-                                       minlen=1,
-                                       verbose=TRUE,
-                                       mutOnly=FALSE,
-                                       cnaOnly=FALSE,
-                                       minGlobSupp=0.01,
-                                       FeatureToExclude=NULL,
-                                       pathway_CFEs = NULL,
-                                       pathwayFocused=NULL,
-                                       subCohortDefinition=NULL,
-                                       NegativeDefinition=FALSE,
-                                       cnaIdMap,
-                                       cnaIdDecode,
-                                       cdg){
-
-
-  # rownames(ctumours)<-paste(rownames(ctumours),'_',1:nrow(ctumours),sep='')
-
-  PANcna_KEY<-cnaIdMap
-  cnaKEY16<-cnaIdDecode
-
-
-  if(length(FeatureToExclude)>0){
-    ctumours<-ctumours[,setdiff(colnames(ctumours),FeatureToExclude)]
-  }
-
-  if(length(subCohortDefinition)>0){
-    if(is.element(subCohortDefinition,colnames(ctumours))){
-      if(NegativeDefinition){
-        ctumours<-ctumours[which(ctumours[,subCohortDefinition]==0),]
-      }else{
-        ctumours<-ctumours[which(ctumours[,subCohortDefinition]==1),]
-      }
-    }
-  }
-
-
-  if (length(pathwayFocused)>0){
-    miniPathways<-pathway_CFEs
-    events<-unique(unlist(miniPathways[pathwayFocused]))
-
-    ii<-grep('cnaPANCA',events)
-
-    cnaevents<-events[ii]
-
-    cnaCS<-unique(unlist(c(PANcna_KEY[match(cnaevents,PANcna_KEY$Identifier),2:ncol(PANcna_KEY)])))
-    cnaCS<-cnaCS[cnaCS!='']
-    cnaCS<-grep(cancerType,cnaCS,value = TRUE)
-    cnaCS<-unique(cnaKEY16$CNA_Identifier[match(cnaCS,cnaKEY16$Identifier)])
-    cnaCS<-cnaCS[!is.na(cnaCS)]
-
-    events<-c(events[-ii],cnaCS)
-
-    ctumours<-ctumours[,intersect(colnames(ctumours),events)]
-  }
-
-
-  if(mutOnly){
-    if(cnaOnly){
-      stop("only one between mutOnly and cnaOnly can be TRUE", call. = FALSE)
-    }
-    ctumours<-ctumours[,setdiff(colnames(ctumours),grep('cna',colnames(ctumours),value=TRUE))]
-  }
-  if(cnaOnly){
-    if(mutOnly){
-      stop("only one between mutOnly and cnaOnly can be TRUE", call. = FALSE)
-    }
-    ctumours<-ctumours[,grep('cna',colnames(ctumours),value=TRUE)]
-  }
-
-
-  SysST<-NULL
-  SysTREE<-NULL
-
-  ROOT<-createNode(SystemStack = SysST,
-                   transactions = ctumours,
-                   currentPoints = rownames(ctumours),
-                   currentFeatures = colnames(ctumours),
-                   Type='root',
-                   Parent.Idx=0,
-                   maxId = 0,
-                   ctype = cancerType,
-                   minlen = minlen,
-                   globalSupport = minGlobSupp,
-                   cnaId_decode = cnaIdDecode)
-
-  if(length(ROOT)>0){
-
-    nROOT <- Node$new(paste(ROOT$Idx,paste(ROOT$decodedIS,collapse=', ')))
-
-    SysST<-stackPush(SysST,ROOT)
-    SysTREE<-stackPush(SysTREE,nROOT)
-
-    NT<-addNodeToNavTable(NavTable = NULL,node = ROOT)
-
-    if(verbose){
-      print(paste('adding root node:',paste(ROOT$decodedIS,collapse=', ')))
-    }
-
-    MD<- -Inf
-
-    while(length(SysST)>0){
-
-      RES<-stackPop(SystemStack = SysST)
-      nRES<-stackPop(SystemStack = SysTREE)
-
-      currentNode<-RES$nNode
-      currentNnode<-nRES$nNode
-
-      SysST<-RES$SYST
-      SysTREE<-nRES$SYST
-
-      if(currentNode$Idx>MD){
-        MD<-currentNode$Idx
-      }
-
-
-      RIGHTCHILD<-createNode(SystemStack = SysST,
-                             transactions = ctumours,
-                             currentPoints = setdiff(currentNode$currentPoints,currentNode$positivePoints),
-                             currentFeatures = setdiff(currentNode$currentFeatures,currentNode$ItemSet),
-                             Type='Right.Child',
-                             Parent.Idx=currentNode$Idx,
-                             maxId=MD,
-                             ctype = cancerType,
-                             minlen=minlen,
-                             globalSupport = minGlobSupp,
-                             cnaId_decode = cnaIdDecode)
-
-      if(length(RIGHTCHILD)>0){
-
-        if(verbose){
-          print(paste('adding right child: ',paste(RIGHTCHILD$decodedIS,collapse=', '),
-                      ' to node ',paste(currentNode$decodedIS,collapse=', ')))
-        }
-
-        SysST<-stackPush(SysST,RIGHTCHILD)
-
-        RCnode<-currentNnode$AddChild(paste(RIGHTCHILD$Idx,
-                                            paste(RIGHTCHILD$decodedIS,collapse=', ')))
-
-        SysTREE<-stackPush(SysTREE,RCnode)
-
-        NT<-addNodeToNavTable(NavTable = NT,node = RIGHTCHILD)
-        MD<-MD+1
-      }
-
-      LEFTCHILD<-createNode(SystemStack = SysST,
-                            transactions = ctumours,
-                            currentPoints = currentNode$positivePoints,
-                            currentFeatures = setdiff(currentNode$currentFeatures,currentNode$ItemSet),
-                            Type='Left.Child',
-                            Parent.Idx=currentNode$Idx,
-                            maxId=MD,
-                            ctype = cancerType,
-                            minlen=minlen,
-                            globalSupport = minGlobSupp,
-                            cnaId_decode = cnaIdDecode)
-
-      if(length(LEFTCHILD)>0){
-        if(verbose){
-          print(paste('adding left child: ',paste(LEFTCHILD$decodedIS,collapse=', '),
-                      ' to node ',paste(currentNode$decodedIS,collapse=', ')))
-        }
-        SysST<-stackPush(SystemStack = SysST,node = LEFTCHILD)
-        LFTnode<-currentNnode$AddChild(paste(LEFTCHILD$Idx,paste(LEFTCHILD$decodedIS,collapse=', ')))
-
-        SysTREE<-stackPush(SysTREE,LFTnode)
-
-        NT<-addNodeToNavTable(NavTable = NT,node = LEFTCHILD)
-      }
-    }
-
-    tmp<-unlist(str_split(Get(Traverse(nROOT,'pre-order'),'name'),' '))
-
-    suppressWarnings(pre_orderVisit<-as.numeric(tmp)[!is.na(as.numeric(tmp))])
-
-    globalSuppAttrb<-round(100*NT$GlobalSupport[match(pre_orderVisit,NT$Idx)],digits = 2)
-    nodeTypeAttrb<-as.character(NT$Type[match(pre_orderVisit,NT$Idx)])
-
-    Set(Traverse(nROOT,traversal = 'pre-order'),NodeType=nodeTypeAttrb)
-    Set(Traverse(nROOT,traversal = 'pre-order'),GlobalSupp=globalSuppAttrb)
-  }else{
-    NT<-matrix(1)
-    nROOT<-NULL
-  }
-
-  CC <- colors(distinct = TRUE)
-  CC <- CC[setdiff(1:length(CC),c(grep('gray',CC),'black'))]
-  CC <- rgb(t(col2rgb(CC)),maxColorValue = 255)
-
-  COLORSbyLev <- CC[sample(length(CC))][1:nROOT$totalCount]
-
-  names(COLORSbyLev)<-names(Get(Traverse(nROOT),'Names'))
-  nROOT$Set(Colors=COLORSbyLev,traversal = 'level')
-
-
-  treeLabels<-unlist(lapply(str_split(Get(Traverse(nROOT,'level'),'name'),'[(]'),
-                            function(x){x[1]}))
-
-  nROOT$Set(name=treeLabels,traversal='level')
-
-  nodeIdx<-as.numeric(unlist(lapply(str_split(treeLabels,' '),function(x){x[1]})))
-
-  COLORS<-rep(NA,length(nodeIdx))
-  COLORS[nodeIdx]<-COLORSbyLev
-
-  NT<-cbind(NT,COLORS)
-  return(list(navTable=NT,TreeRoot=nROOT))
 }
 CELLector.unicizeSamples<-function(ctumours,keepReplicates=TRUE){
   if (keepReplicates){
@@ -508,7 +301,6 @@ CELLector.visualiseSearchingSpace<-function(searchSpace,CLdata=NULL){
 
   searchSpace$TreeRoot$Set(RelatesToFatherAs=RelatesToFatherAs,traversal = 'level')
 
-
   levelVisitOrder<-as.numeric(unlist(lapply(str_split(Get(Traverse(searchSpace$TreeRoot,
                                                                    traversal = 'level'),'name'),' '),function(x){x[1]})))
 
@@ -632,6 +424,236 @@ CELLector.changeSScolors<-function(searchSpace){
   return(searchSpace)
 }
 
+
+## Exported with documentation to be amended
+
+CELLector.Build_Search_Space<-function(ctumours,
+                                       cancerType,
+                                       minlen=1,
+                                       verbose=TRUE,
+                                       mutOnly=FALSE,
+                                       cnaOnly=FALSE,
+                                       includeHMS=FALSE,
+                                       minGlobSupp=0.01,
+                                       FeatureToExclude=NULL,
+                                       pathway_CFEs = NULL,
+                                       pathwayFocused=NULL,
+                                       subCohortDefinition=NULL,
+                                       NegativeDefinition=FALSE,
+                                       cnaIdMap,
+                                       cnaIdDecode,
+                                       hmsIdDecode,
+                                       cdg){
+
+
+  PANcna_KEY<-cnaIdMap
+  cnaKEY16<-cnaIdDecode
+
+
+  if(length(FeatureToExclude)>0){
+    ctumours<-ctumours[,setdiff(colnames(ctumours),FeatureToExclude)]
+  }
+
+  if(length(subCohortDefinition)>0){
+    if(is.element(subCohortDefinition,colnames(ctumours))){
+      if(NegativeDefinition){
+        ctumours<-ctumours[which(ctumours[,subCohortDefinition]==0),]
+      }else{
+        ctumours<-ctumours[which(ctumours[,subCohortDefinition]==1),]
+      }
+    }
+  }
+
+
+  if (length(pathwayFocused)>0){
+    miniPathways<-pathway_CFEs
+    events<-unique(unlist(miniPathways[pathwayFocused]))
+
+    ii<-grep('cnaPANCA',events)
+
+    cnaevents<-events[ii]
+
+    cnaCS<-unique(unlist(c(PANcna_KEY[match(cnaevents,PANcna_KEY$Identifier),2:ncol(PANcna_KEY)])))
+    cnaCS<-cnaCS[cnaCS!='']
+    cnaCS<-grep(cancerType,cnaCS,value = TRUE)
+    cnaCS<-unique(cnaKEY16$CNA_Identifier[match(cnaCS,cnaKEY16$Identifier)])
+    cnaCS<-cnaCS[!is.na(cnaCS)]
+
+    events<-c(events[-ii],cnaCS)
+
+    ctumours<-ctumours[,intersect(colnames(ctumours),events)]
+  }
+
+
+  if(mutOnly){
+    if(cnaOnly){
+      stop("only one between mutOnly and cnaOnly can be TRUE", call. = FALSE)
+    }
+    ctumours<-ctumours[,setdiff(colnames(ctumours),grep('cna',colnames(ctumours),value=TRUE))]
+  }
+  if(cnaOnly){
+    if(mutOnly){
+      stop("only one between mutOnly and cnaOnly can be TRUE", call. = FALSE)
+    }
+    ctumours<-ctumours[,grep('cna',colnames(ctumours),value=TRUE)]
+  }
+
+
+  SysST<-NULL
+  SysTREE<-NULL
+
+  ROOT<-createNode(SystemStack = SysST,
+                   transactions = ctumours,
+                   currentPoints = rownames(ctumours),
+                   currentFeatures = colnames(ctumours),
+                   Type='root',
+                   Parent.Idx=0,
+                   maxId = 0,
+                   ctype = cancerType,
+                   minlen = minlen,
+                   globalSupport = minGlobSupp,
+                   cnaId_decode = cnaIdDecode,hmsId_decode = hmsIdDecode)
+
+  if(length(ROOT)>0){
+
+    nROOT <- Node$new(paste(ROOT$Idx,paste(ROOT$decodedIS,collapse=', ')))
+
+    SysST<-stackPush(SysST,ROOT)
+    SysTREE<-stackPush(SysTREE,nROOT)
+
+    NT<-addNodeToNavTable(NavTable = NULL,node = ROOT)
+
+    if(verbose){
+      print(paste('adding root node:',paste(ROOT$decodedIS,collapse=', ')))
+    }
+
+    MD<- -Inf
+
+    while(length(SysST)>0){
+
+      RES<-stackPop(SystemStack = SysST)
+      nRES<-stackPop(SystemStack = SysTREE)
+
+      currentNode<-RES$nNode
+      currentNnode<-nRES$nNode
+
+      SysST<-RES$SYST
+      SysTREE<-nRES$SYST
+
+      if(currentNode$Idx>MD){
+        MD<-currentNode$Idx
+      }
+
+
+      RIGHTCHILD<-createNode(SystemStack = SysST,
+                             transactions = ctumours,
+                             currentPoints = setdiff(currentNode$currentPoints,currentNode$positivePoints),
+                             currentFeatures = setdiff(currentNode$currentFeatures,currentNode$ItemSet),
+                             Type='Right.Child',
+                             Parent.Idx=currentNode$Idx,
+                             maxId=MD,
+                             ctype = cancerType,
+                             minlen=minlen,
+                             globalSupport = minGlobSupp,
+                             cnaId_decode = cnaIdDecode,hmsId_decode = hmsIdDecode)
+
+      if(length(RIGHTCHILD)>0){
+
+        if(verbose){
+          print(paste('adding right child: ',paste(RIGHTCHILD$decodedIS,collapse=', '),
+                      ' to node ',paste(currentNode$decodedIS,collapse=', ')))
+        }
+
+        SysST<-stackPush(SysST,RIGHTCHILD)
+
+        RCnode<-currentNnode$AddChild(paste(RIGHTCHILD$Idx,
+                                            paste(RIGHTCHILD$decodedIS,collapse=', ')))
+
+        SysTREE<-stackPush(SysTREE,RCnode)
+
+        NT<-addNodeToNavTable(NavTable = NT,node = RIGHTCHILD)
+        MD<-MD+1
+      }
+
+      LEFTCHILD<-createNode(SystemStack = SysST,
+                            transactions = ctumours,
+                            currentPoints = currentNode$positivePoints,
+                            currentFeatures = setdiff(currentNode$currentFeatures,currentNode$ItemSet),
+                            Type='Left.Child',
+                            Parent.Idx=currentNode$Idx,
+                            maxId=MD,
+                            ctype = cancerType,
+                            minlen=minlen,
+                            globalSupport = minGlobSupp,
+                            cnaId_decode = cnaIdDecode,hmsId_decode = hmsIdDecode)
+
+      if(length(LEFTCHILD)>0){
+        if(verbose){
+          print(paste('adding left child: ',paste(LEFTCHILD$decodedIS,collapse=', '),
+                      ' to node ',paste(currentNode$decodedIS,collapse=', ')))
+        }
+        SysST<-stackPush(SystemStack = SysST,node = LEFTCHILD)
+        LFTnode<-currentNnode$AddChild(paste(LEFTCHILD$Idx,paste(LEFTCHILD$decodedIS,collapse=', ')))
+
+        SysTREE<-stackPush(SysTREE,LFTnode)
+
+        NT<-addNodeToNavTable(NavTable = NT,node = LEFTCHILD)
+      }
+    }
+
+    tmp<-unlist(str_split(Get(Traverse(nROOT,'pre-order'),'name'),' '))
+
+    suppressWarnings(pre_orderVisit<-as.numeric(tmp)[!is.na(as.numeric(tmp))])
+
+    globalSuppAttrb<-round(100*NT$GlobalSupport[match(pre_orderVisit,NT$Idx)],digits = 2)
+    nodeTypeAttrb<-as.character(NT$Type[match(pre_orderVisit,NT$Idx)])
+
+    Set(Traverse(nROOT,traversal = 'pre-order'),NodeType=nodeTypeAttrb)
+    Set(Traverse(nROOT,traversal = 'pre-order'),GlobalSupp=globalSuppAttrb)
+  }else{
+    NT<-matrix(1)
+    nROOT<-NULL
+  }
+
+  CC <- colors(distinct = TRUE)
+  CC <- CC[setdiff(1:length(CC),c(grep('gray',CC),'black'))]
+  CC <- rgb(t(col2rgb(CC)),maxColorValue = 255)
+
+  COLORSbyLev <- CC[sample(length(CC))][1:nROOT$totalCount]
+
+  names(COLORSbyLev)<-names(Get(Traverse(nROOT),'Names'))
+  nROOT$Set(Colors=COLORSbyLev,traversal = 'level')
+
+
+  tmpLabels<-Get(Traverse(nROOT,'level'),'name')
+
+
+  treeLabels<-lapply(tmpLabels,function(x){
+    y<-x
+    start_<-str_locate_all(y,'[(]')[[1]][,1]
+    end_<-str_locate_all(y,'[)]')[[1]][,1]
+
+    for (mm in 1:length(start_)){
+      n_start_<-str_locate_all(y,'[(]')[[1]][,1]
+      n_end_<-str_locate_all(y,'[)]')[[1]][,1]
+      y<-str_remove(y,paste('[(]',str_sub(y,n_start_[1]+1,n_end_[1]-1),'[)]',sep=''))
+    }
+    return(y)
+    }
+    )
+
+  nROOT$Set(name=treeLabels,traversal='level')
+
+  nodeIdx<-as.numeric(unlist(lapply(str_split(treeLabels,' '),function(x){x[1]})))
+
+  COLORS<-rep(NA,length(nodeIdx))
+  COLORS[nodeIdx]<-COLORSbyLev
+
+  NT<-cbind(NT,COLORS)
+  return(list(navTable=NT,TreeRoot=nROOT))
+}
+
+## Exported not yet Documented functions
 CELLector.Score <- function(NavTab, CELLlineData,alfa=0.75){
 
   if(alfa>=0 & alfa<=1){
@@ -649,7 +671,7 @@ CELLector.Score <- function(NavTab, CELLlineData,alfa=0.75){
 
     tabCSS <- cbind(NavTab[ ,c(1,9)], SignaturesES, MODELS)
 
-    SortedSubpop <- CELLector.selectionVisit(TAV = CSS$navTable)
+    SortedSubpop <- CELLector.selectionVisit(TAV = NavTab)
     tabCSS <- tabCSS[tabCSS$Idx[SortedSubpop],]
 
     vecSigLength <- c()
@@ -733,8 +755,28 @@ CELLector.Score <- function(NavTab, CELLlineData,alfa=0.75){
 
 
 }
+CELLector.hms_look_up <- function(hms_ID, hmsId_decode, TCGALabel) {
 
+  cnaKEY16<-hmsId_decode
+  CancerSpecificData <- cnaKEY16 %>% filter(Cancer.Types == paste(TCGALabel))
 
+  if (length(hms_ID) == 1) {
+
+    info <- CancerSpecificData %>% filter(hms_id == paste0(hms_ID))
+
+  } else if (length(hms_ID) > 1) {
+
+    info <- CancerSpecificData %>% filter(hms_id %in% hms_ID)
+  }
+
+  return(info)
+
+}
+
+## Exported not yet Documented data objects
+# CELLector.CellLine.BEMs_v2
+# CELLector.PrimTum.BEMs_v2
+# CELLector.CFEs.HMSid_decode
 
 ## not Exported functions
 sunBurstFormat<-function(searchSpace){
@@ -925,10 +967,11 @@ createRuleFromNode<-function(NavTab,nodeIdx){
       }else{
         prefix<-''
       }
-      currentTerm<-paste(prefix,str_trim(as.character(NavTab$ItemsDecoded[pos])),sep='')
-      SIGNATURE<-paste(currentTerm,SIGNATURE)
-      EcurrentTerm<-paste(prefix,NavTab$Items[pos],sep='')
-      encodedSIGNATURE<-paste(EcurrentTerm,encodedSIGNATURE)
+
+      currentTerm<-paste(paste(prefix,unlist(str_split(NavTab$ItemsDecoded[pos],', ')),sep=''),collapse=', ')
+      SIGNATURE<-paste(currentTerm,SIGNATURE,sep=', ')
+      EcurrentTerm<-paste(paste(prefix,unlist(str_split(NavTab$Items[pos],', ')),sep=''),collapse=', ')
+      encodedSIGNATURE<-paste(EcurrentTerm,encodedSIGNATURE,sep=', ')
     }
 
   }
@@ -950,6 +993,7 @@ createNode<-function(SystemStack,
                      globalSupport=0.02,
                      minlen=1,ctype,
                      cnaId_decode,
+                     hmsId_decode,
                      cdg=NULL){
 
   nodeIdx<-maxId+1
@@ -980,7 +1024,8 @@ createNode<-function(SystemStack,
 
       IS<-RES$MSIS
 
-      dIS<-decodeCNAs(ctype = ctype,codedCNA = IS, cnaId_decode = cnaId_decode, cdg = cdg)
+      dIS<-decodeSIG(ctype = ctype,codedSIG = IS, cnaId_decode = cnaId_decode, hmsId_decode = hmsId_decode,cdg = cdg)
+
 
       if(length(IS)==1){
         gs<-sum(transactions[,IS])/nrow(transactions)
@@ -1008,17 +1053,15 @@ createNode<-function(SystemStack,
     return(NULL)
   }
 }
-decodeCNAs<-function(ctype,codedCNA,cnaId_decode,cdg){
-  IS<-codedCNA
+decodeSIG<-function(ctype,codedSIG,cnaId_decode,hmsId_decode=NULL,cdg){
+  IS<-codedSIG
   icna<-grep('cna',IS)
 
   #if(length(icna)>0){
 
-  noncna<-setdiff(1:length(IS),icna)
 
 
   if (length(icna)>0){
-
 
     cnalu<-CELLector.cna_look_up(IS[icna],TCGALabel = ctype,cnaId_decode = cnaId_decode)
 
@@ -1044,8 +1087,23 @@ decodeCNAs<-function(ctype,codedCNA,cnaId_decode,cdg){
 
     IS[icna]<-paste(AT,loci,'(',genes,')',sep='')}
 
+  ihms<-grep('hms',IS)
+
+  if (length(ihms)>0){
+
+    cnalu<-CELLector.hms_look_up(IS[ihms],TCGALabel = ctype,hmsId_decode = hmsId_decode)
+
+    genes<-cnalu$GN
+
+    IS[ihms]<-paste('HypMet_',genes,sep='')
+
+
+    }
+
+  noncna<-setdiff(1:length(IS),c(icna,ihms))
+
   IS[noncna]<-paste(IS[noncna],'mut',sep='')
-  #}
+
   return(IS)
 }
 stackPush<-function(SystemStack,node){
