@@ -26,5 +26,15 @@ export(CELLector.selectionVisit)
 export(CELLector.changeSScolors)
 export(CELLector.visualiseSearchingSpace)
 export(CELLector.visualiseSearchingSpace_sunBurst)
+
 exportPattern("^[[:alpha:]]+")
+
+## not documented
+export(CELLector.Score)
+export(CELLector.hms_look_up)
+export(CELLector.CMPs_getModelAnnotation)
+export(CELLector.CMPs_getDriverGenes)
+export(CELLector.CMPs_getVariants)
+export(CELLector.CELLline_buildBEM)
+
 

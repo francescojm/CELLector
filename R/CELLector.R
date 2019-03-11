@@ -822,13 +822,25 @@ CELLector.CELLline_buildBEM <- function(varCat=NULL,
 
   varCat<-varCat[which(is.element(varCat$gene_symbol,GenesToConsider)),]
 
-
   sigs<-paste(varCat$gene_symbol,varCat$cdna_mutation,paste('p.',varCat$aa_mutation,sep=''))
 
   varCat<-varCat[which(is.element(sigs,VariantsToConsider)),]
 
+  allModels<-sort(unique(varCat$model_name))
+  allModel_ids<-varCat$model_id[match(allModels,varCat$model_name)]
 
+  allGenes<-sort(unique(varCat$gene_symbol))
 
+  BEM<-do.call(what = cbind,lapply(allModels,function(x){
+    is.element(allGenes,varCat$gene_symbol[varCat$model_name==x])+0
+    }))
+  rownames(BEM)<-allGenes
+
+  BEM<-data.frame(CMP_identifier=allModel_ids,
+             CellLine=allModels,
+             t(BEM))
+
+  return(BEM)
 }
 
 
