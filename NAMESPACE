@@ -3,6 +3,8 @@ import(igraph)
 import(stringr)
 import(data.tree)
 import(grDevices)
+import(RCurl)
+import(readr)
 
 importFrom("methods", "as")
 importFrom("stats", "start")

@@ -773,10 +773,79 @@ CELLector.hms_look_up <- function(hms_ID, hmsId_decode, TCGALabel) {
 
 }
 
+CELLector.CMPs_getModelAnnotation <- function(URL='https://cog.sanger.ac.uk/cmp/download/model_list_latest.csv.gz'){
+  if(url.exists(URL)){
+    X <- read_csv(URL)
+  }else{
+    X <- NULL
+  }
+  return(X)
+}
+CELLector.CMPs_getDriverGenes <- function(URL='https://cog.sanger.ac.uk/cmp/download/cancer_genes_latest.csv.gz'){
+  if(url.exists(URL)){
+    X <- read_csv(URL)
+    X <- X$gene_symbol
+  }else{
+    X <- NULL
+  }
+  return(X)
+}
+CELLector.CMPs_getVariants <- function(URL='https://cog.sanger.ac.uk/cmp/download/mutations_2018-08-01_1640.csv.gz'){
+  if(url.exists(URL)){
+    X<-read_csv(URL)
+  }else{
+    X <- NULL
+  }
+  return(X)
+}
+
+CELLector.CELLline_buildBEM <- function(varCat=NULL,
+                                        Tissue,
+                                        Cancer_Type,
+                                        GenesToConsider,
+                                        VariantsToConsider,excludeOrganoids=FALSE){
+
+  if(length(varCat)==0){
+    varCat<-CELLector.CMPs_getVariants()
+    clAnnotation<-CELLector.CMPs_getModelAnnotation()
+
+    if(!excludeOrganoids){
+      id<-which(clAnnotation$tissue==Tissue & clAnnotation$cancer_type==Cancer_Type)
+    }else{
+      id<-which(clAnnotation$tissue==Tissue & clAnnotation$cancer_type==Cancer_Type & clAnnotation$model_type!='Organoid')
+    }
+
+    cls<-clAnnotation$model_name[id]
+
+    varCat<-varCat[which(is.element(varCat$model_name,cls)),]
+  }
+
+  varCat<-varCat[which(is.element(varCat$gene_symbol,GenesToConsider)),]
+
+
+  sigs<-paste(varCat$gene_symbol,varCat$cdna_mutation,paste('p.',varCat$aa_mutation,sep=''))
+
+  varCat<-varCat[which(is.element(sigs,VariantsToConsider)),]
+
+
+
+}
+
+
+
+
+
+
+
+
 ## Exported not yet Documented data objects
 # CELLector.CellLine.BEMs_v2
 # CELLector.PrimTum.BEMs_v2
 # CELLector.CFEs.HMSid_decode
+# CELLector.PrimTumVar
+# CELLector.RecFilteredVariants
+# CELLector.RecfiltVariants
+
 
 ## not Exported functions
 sunBurstFormat<-function(searchSpace){
