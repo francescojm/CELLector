@@ -761,13 +761,8 @@ CELLector.CELLline_buildBEM <- function(varCat=NULL,
                                         gender_select=NULL,
                                         mutational_burden_th=NULL,
                                         age_at_sampling=NULL,
-
                                         ploidy_th=NULL,
-
                                         ethnicity_to_exclude=NULL,
-
-
-
                                         GenesToConsider=NULL,
                                         VariantsToConsider=NULL){
 
@@ -908,20 +903,20 @@ CELLector.Tumours_buildBEM <- function(varCat=NULL,
   }
 
   if(length(GenesToConsider)>0){
-    varCat<-varCat[which(is.element(varCat$gene_symbol,GenesToConsider)),]
+    varCat<-varCat[which(is.element(varCat$Gene,GenesToConsider)),]
   }
 
   if(length(VariantsToConsider)>0){
-    sigs<-paste(varCat$gene_symbol,varCat$cdna_mutation,varCat$AA)
+    sigs<-paste(varCat$Gene,varCat$cDNA,varCat$AA)
     varCat<-varCat[which(is.element(sigs,VariantsToConsider)),]
   }
 
   allSamples<-sort(unique(varCat$SAMPLE))
 
-  allGenes<-sort(unique(varCat$gene_symbol))
+  allGenes<-sort(unique(varCat$Gene))
 
   BEM<-do.call(what = cbind,lapply(allSamples,function(x){
-    is.element(allGenes,varCat$gene_symbol[varCat$SAMPLE==x])+0
+    is.element(allGenes,varCat$Gene[varCat$SAMPLE==x])+0
   }))
 
   rownames(BEM)<-allGenes
@@ -929,6 +924,7 @@ CELLector.Tumours_buildBEM <- function(varCat=NULL,
 
   return(BEM)
 }
+
 
 
 CELLector.CMPs_getModelAnnotation <- function(URL='https://cog.sanger.ac.uk/cmp/download/model_list_latest.csv.gz'){
