@@ -422,6 +422,9 @@ CELLector.changeSScolors<-function(searchSpace){
 
   return(searchSpace)
 }
+
+
+## Exported non Documented functions
 CELLector.Score <- function(NavTab, CELLlineData,alfa=0.75){
 
   if(alfa>=0 & alfa<=1){
@@ -439,7 +442,7 @@ CELLector.Score <- function(NavTab, CELLlineData,alfa=0.75){
 
     tabCSS <- cbind(NavTab[ ,c(1,9)], SignaturesES, MODELS)
 
-    SortedSubpop <- CELLector.selectionVisit(TAV = CSS$navTable)
+    SortedSubpop <- CELLector.selectionVisit(TAV = NavTab)
     tabCSS <- tabCSS[tabCSS$Idx[SortedSubpop],]
 
     vecSigLength <- c()
@@ -519,12 +522,7 @@ CELLector.Score <- function(NavTab, CELLlineData,alfa=0.75){
   }else{
     print('Error: alfa needs to be >=0 and <=1')
   }
-
-
-
 }
-
-## Exported non Documented functions
 CELLector.Build_Search_Space<-function(ctumours,
                                        cancerType,
                                        minlen=1,
@@ -752,218 +750,186 @@ CELLector.Build_Search_Space<-function(ctumours,
   NT<-cbind(NT,COLORS)
   return(list(navTable=NT,TreeRoot=nROOT))
 }
+CELLector.CELLline_buildBEM <- function(varCat=NULL,
+                                        Tissue,
+                                        Cancer_Type,
+                                        Cancer_Type_details=NULL,
+                                        sample_site=NULL,
+                                        excludeOrganoids=FALSE,
+                                        humanonly=TRUE,
+                                        msi_status_select=NULL,
+                                        gender_select=NULL,
+                                        mutational_burden_th=NULL,
+                                        age_at_sampling=NULL,
 
-# CELLector.Build_Search_Space<-function(ctumours,
-#                                        cancerType,
-#                                        minlen=1,
-#                                        verbose=TRUE,
-#                                        mutOnly=FALSE,
-#                                        cnaOnly=FALSE,
-#                                        minGlobSupp=0.01,
-#                                        FeatureToExclude=NULL,
-#                                        pathway_CFEs = NULL,
-#                                        pathwayFocused=NULL,
-#                                        subCohortDefinition=NULL,
-#                                        NegativeDefinition=FALSE,
-#                                        cnaIdMap,
-#                                        cnaIdDecode,
-#                                        cdg){
-#
-#
-#   # rownames(ctumours)<-paste(rownames(ctumours),'_',1:nrow(ctumours),sep='')
-#
-#   PANcna_KEY<-cnaIdMap
-#   cnaKEY16<-cnaIdDecode
-#
-#
-#   if(length(FeatureToExclude)>0){
-#     ctumours<-ctumours[,setdiff(colnames(ctumours),FeatureToExclude)]
-#   }
-#
-#   if(length(subCohortDefinition)>0){
-#     if(is.element(subCohortDefinition,colnames(ctumours))){
-#       if(NegativeDefinition){
-#         ctumours<-ctumours[which(ctumours[,subCohortDefinition]==0),]
-#       }else{
-#         ctumours<-ctumours[which(ctumours[,subCohortDefinition]==1),]
-#       }
-#     }
-#   }
-#
-#
-#   if (length(pathwayFocused)>0){
-#     miniPathways<-pathway_CFEs
-#     events<-unique(unlist(miniPathways[pathwayFocused]))
-#
-#     ii<-grep('cnaPANCA',events)
-#
-#     cnaevents<-events[ii]
-#
-#     cnaCS<-unique(unlist(c(PANcna_KEY[match(cnaevents,PANcna_KEY$Identifier),2:ncol(PANcna_KEY)])))
-#     cnaCS<-cnaCS[cnaCS!='']
-#     cnaCS<-grep(cancerType,cnaCS,value = TRUE)
-#     cnaCS<-unique(cnaKEY16$CNA_Identifier[match(cnaCS,cnaKEY16$Identifier)])
-#     cnaCS<-cnaCS[!is.na(cnaCS)]
-#
-#     events<-c(events[-ii],cnaCS)
-#
-#     ctumours<-ctumours[,intersect(colnames(ctumours),events)]
-#   }
-#
-#
-#   if(mutOnly){
-#     if(cnaOnly){
-#       stop("only one between mutOnly and cnaOnly can be TRUE", call. = FALSE)
-#     }
-#     ctumours<-ctumours[,setdiff(colnames(ctumours),grep('cna',colnames(ctumours),value=TRUE))]
-#   }
-#   if(cnaOnly){
-#     if(mutOnly){
-#       stop("only one between mutOnly and cnaOnly can be TRUE", call. = FALSE)
-#     }
-#     ctumours<-ctumours[,grep('cna',colnames(ctumours),value=TRUE)]
-#   }
-#
-#
-#   SysST<-NULL
-#   SysTREE<-NULL
-#
-#   ROOT<-createNode(SystemStack = SysST,
-#                    transactions = ctumours,
-#                    currentPoints = rownames(ctumours),
-#                    currentFeatures = colnames(ctumours),
-#                    Type='root',
-#                    Parent.Idx=0,
-#                    maxId = 0,
-#                    ctype = cancerType,
-#                    minlen = minlen,
-#                    globalSupport = minGlobSupp,
-#                    cnaId_decode = cnaIdDecode)
-#
-#   if(length(ROOT)>0){
-#
-#     nROOT <- Node$new(paste(ROOT$Idx,paste(ROOT$decodedIS,collapse=', ')))
-#
-#     SysST<-stackPush(SysST,ROOT)
-#     SysTREE<-stackPush(SysTREE,nROOT)
-#
-#     NT<-addNodeToNavTable(NavTable = NULL,node = ROOT)
-#
-#     if(verbose){
-#       print(paste('adding root node:',paste(ROOT$decodedIS,collapse=', ')))
-#     }
-#
-#     MD<- -Inf
-#
-#     while(length(SysST)>0){
-#
-#       RES<-stackPop(SystemStack = SysST)
-#       nRES<-stackPop(SystemStack = SysTREE)
-#
-#       currentNode<-RES$nNode
-#       currentNnode<-nRES$nNode
-#
-#       SysST<-RES$SYST
-#       SysTREE<-nRES$SYST
-#
-#       if(currentNode$Idx>MD){
-#         MD<-currentNode$Idx
-#       }
-#
-#
-#       RIGHTCHILD<-createNode(SystemStack = SysST,
-#                              transactions = ctumours,
-#                              currentPoints = setdiff(currentNode$currentPoints,currentNode$positivePoints),
-#                              currentFeatures = setdiff(currentNode$currentFeatures,currentNode$ItemSet),
-#                              Type='Right.Child',
-#                              Parent.Idx=currentNode$Idx,
-#                              maxId=MD,
-#                              ctype = cancerType,
-#                              minlen=minlen,
-#                              globalSupport = minGlobSupp,
-#                              cnaId_decode = cnaIdDecode)
-#
-#       if(length(RIGHTCHILD)>0){
-#
-#         if(verbose){
-#           print(paste('adding right child: ',paste(RIGHTCHILD$decodedIS,collapse=', '),
-#                       ' to node ',paste(currentNode$decodedIS,collapse=', ')))
-#         }
-#
-#         SysST<-stackPush(SysST,RIGHTCHILD)
-#
-#         RCnode<-currentNnode$AddChild(paste(RIGHTCHILD$Idx,
-#                                             paste(RIGHTCHILD$decodedIS,collapse=', ')))
-#
-#         SysTREE<-stackPush(SysTREE,RCnode)
-#
-#         NT<-addNodeToNavTable(NavTable = NT,node = RIGHTCHILD)
-#         MD<-MD+1
-#       }
-#
-#       LEFTCHILD<-createNode(SystemStack = SysST,
-#                             transactions = ctumours,
-#                             currentPoints = currentNode$positivePoints,
-#                             currentFeatures = setdiff(currentNode$currentFeatures,currentNode$ItemSet),
-#                             Type='Left.Child',
-#                             Parent.Idx=currentNode$Idx,
-#                             maxId=MD,
-#                             ctype = cancerType,
-#                             minlen=minlen,
-#                             globalSupport = minGlobSupp,
-#                             cnaId_decode = cnaIdDecode)
-#
-#       if(length(LEFTCHILD)>0){
-#         if(verbose){
-#           print(paste('adding left child: ',paste(LEFTCHILD$decodedIS,collapse=', '),
-#                       ' to node ',paste(currentNode$decodedIS,collapse=', ')))
-#         }
-#         SysST<-stackPush(SystemStack = SysST,node = LEFTCHILD)
-#         LFTnode<-currentNnode$AddChild(paste(LEFTCHILD$Idx,paste(LEFTCHILD$decodedIS,collapse=', ')))
-#
-#         SysTREE<-stackPush(SysTREE,LFTnode)
-#
-#         NT<-addNodeToNavTable(NavTable = NT,node = LEFTCHILD)
-#       }
-#     }
-#
-#     tmp<-unlist(str_split(Get(Traverse(nROOT,'pre-order'),'name'),' '))
-#
-#     suppressWarnings(pre_orderVisit<-as.numeric(tmp)[!is.na(as.numeric(tmp))])
-#
-#     globalSuppAttrb<-round(100*NT$GlobalSupport[match(pre_orderVisit,NT$Idx)],digits = 2)
-#     nodeTypeAttrb<-as.character(NT$Type[match(pre_orderVisit,NT$Idx)])
-#
-#     Set(Traverse(nROOT,traversal = 'pre-order'),NodeType=nodeTypeAttrb)
-#     Set(Traverse(nROOT,traversal = 'pre-order'),GlobalSupp=globalSuppAttrb)
-#   }else{
-#     NT<-matrix(1)
-#     nROOT<-NULL
-#   }
-#
-#   CC <- colors(distinct = TRUE)
-#   CC <- CC[setdiff(1:length(CC),c(grep('gray',CC),'black'))]
-#   CC <- rgb(t(col2rgb(CC)),maxColorValue = 255)
-#
-#   COLORSbyLev <- CC[sample(length(CC))][1:nROOT$totalCount]
-#
-#   names(COLORSbyLev)<-names(Get(Traverse(nROOT),'Names'))
-#   nROOT$Set(Colors=COLORSbyLev,traversal = 'level')
-#
-#
-#   treeLabels<-unlist(lapply(str_split(Get(Traverse(nROOT,'level'),'name'),'[(]'),
-#                             function(x){x[1]}))
-#
-#   nROOT$Set(name=treeLabels,traversal='level')
-#
-#   nodeIdx<-as.numeric(unlist(lapply(str_split(treeLabels,' '),function(x){x[1]})))
-#
-#   COLORS<-rep(NA,length(nodeIdx))
-#   COLORS[nodeIdx]<-COLORSbyLev
-#
-#   NT<-cbind(NT,COLORS)
-#   return(list(navTable=NT,TreeRoot=nROOT))
-# }
+                                        ploidy_th=NULL,
+
+                                        ethnicity_to_exclude=NULL,
+
+
+
+                                        GenesToConsider=NULL,
+                                        VariantsToConsider=NULL){
+
+  if(length(varCat)==0){
+    varCat<-CELLector.CMPs_getVariants()
+    clAnnotation<-CELLector.CMPs_getModelAnnotation()
+
+    if(!excludeOrganoids){
+      id<-which(clAnnotation$tissue==Tissue & is.element(clAnnotation$cancer_type,Cancer_Type))
+    }else{
+      id<-which(clAnnotation$tissue==Tissue & is.element(clAnnotation$cancer_type,Cancer_Type) & clAnnotation$model_type!='Organoid')
+    }
+
+    cls<-clAnnotation$model_id[id]
+    varCat<-varCat[which(is.element(varCat$model_id,cls)),]
+    clAnnotation<-clAnnotation[which(is.element(clAnnotation$model_id,cls)),]
+
+    if(length(Cancer_Type_details)>0){
+      id<-which(is.element(clAnnotation$cancer_type_detail,Cancer_Type_details))
+
+      cls<-clAnnotation$model_id[id]
+      varCat<-varCat[which(is.element(varCat$model_id,cls)),]
+      clAnnotation<-clAnnotation[which(is.element(clAnnotation$model_id,cls)),]
+    }
+
+
+
+
+    if(length(sample_site)>0){
+      id<-which(is.element(clAnnotation$sample_site,sample_site))
+
+      cls<-clAnnotation$model_id[id]
+      varCat<-varCat[which(is.element(varCat$model_id,cls)),]
+      clAnnotation<-clAnnotation[which(is.element(clAnnotation$model_id,cls)),]
+
+    }
+
+    if(length(humanonly)>0){
+      id<-which(clAnnotation$species=="Homo Sapiens")
+
+      cls<-clAnnotation$model_id[id]
+      varCat<-varCat[which(is.element(varCat$model_id,cls)),]
+      clAnnotation<-clAnnotation[which(is.element(clAnnotation$model_id,cls)),]
+    }
+
+    if(length(msi_status_select)>0){
+      id<-which(!is.na(clAnnotation$msi_status) & (clAnnotation$msi_status==msi_status_select |
+                                                     (msi_status_select=='MSI-L/H' & (clAnnotation$msi_status=='MSI-L' | clAnnotation$msi_status=='MSI-H'))))
+      cls<-clAnnotation$model_id[id]
+      varCat<-varCat[which(is.element(varCat$model_id,cls)),]
+      clAnnotation<-clAnnotation[which(is.element(clAnnotation$model_id,cls)),]
+    }
+
+    if(length(gender_select)>0){
+      id<-which(is.element(clAnnotation$gender,gender_select))
+      cls<-clAnnotation$model_id[id]
+      varCat<-varCat[which(is.element(varCat$model_id,cls)),]
+      clAnnotation<-clAnnotation[which(is.element(clAnnotation$model_id,cls)),]
+    }
+
+    if(length(ethnicity_to_exclude)>0){
+      id<-which(!is.element(clAnnotation$ethnicity,ethnicity_to_exclude))
+      cls<-clAnnotation$model_id[id]
+      varCat<-varCat[which(is.element(varCat$model_id,cls)),]
+      clAnnotation<-clAnnotation[which(is.element(clAnnotation$model_id,cls)),]
+    }
+
+    if(length(mutational_burden_th)>0){
+      id<-which(round(clAnnotation$mutational_burden)>=mutational_burden_th[1] & round(clAnnotation$mutational_burden)<=mutational_burden_th[2])
+      cls<-clAnnotation$model_id[id]
+      varCat<-varCat[which(is.element(varCat$model_id,cls)),]
+      clAnnotation<-clAnnotation[which(is.element(clAnnotation$model_id,cls)),]
+    }
+
+
+
+    if(length(ploidy_th)>0){
+      id<-which(round(clAnnotation$ploidy)>=ploidy_th[1] & round(clAnnotation$ploidy)<=ploidy_th[2])
+      cls<-clAnnotation$model_id[id]
+      varCat<-varCat[which(is.element(varCat$model_id,cls)),]
+      clAnnotation<-clAnnotation[which(is.element(clAnnotation$model_id,cls)),]
+    }
+
+    if(length(age_at_sampling)>0){
+      id<-which(round(clAnnotation$age_at_sampling)>=age_at_sampling[1] & round(clAnnotation$age_at_sampling)<=age_at_sampling[2])
+      cls<-clAnnotation$model_id[id]
+      varCat<-varCat[which(is.element(varCat$model_id,cls)),]
+      clAnnotation<-clAnnotation[which(is.element(clAnnotation$model_id,cls)),]
+    }
+
+    if(length(GenesToConsider)>0){
+      varCat<-varCat[which(is.element(varCat$gene_symbol,GenesToConsider)),]
+    }
+
+    if(length(VariantsToConsider)>0){
+      sigs<-paste(varCat$gene_symbol,varCat$cdna_mutation,paste('p.',varCat$aa_mutation,sep=''))
+      varCat<-varCat[which(is.element(sigs,VariantsToConsider)),]
+    }
+  }
+
+
+  print(sort(cls))
+
+  allModels<-sort(unique(varCat$model_id))
+  allModel_ids<-varCat$model_id[match(allModels,varCat$model_id)]
+
+  allGenes<-sort(unique(varCat$gene_symbol))
+
+  BEM<-do.call(what = cbind,lapply(allModels,function(x){
+    is.element(allGenes,varCat$gene_symbol[varCat$model_id==x])+0
+  }))
+  rownames(BEM)<-allGenes
+
+  cls<-clAnnotation$model_name[match(allModel_ids,clAnnotation$model_id)]
+
+  BEM<-data.frame(CMP_identifier=allModel_ids,
+                  CellLine=cls,
+                  t(BEM))
+
+
+
+  return(BEM)
+}
+
+CELLector.Tumours_buildBEM <- function(varCat=NULL,
+                                       Cancer_Type,
+                                       GenesToConsider=NULL,
+                                       VariantsToConsider=NULL){
+
+
+  if(length(varCat)==0){
+    data(CELLector.PrimTumVarCatalog)
+    varCat<-CELLector.PrimTumVarCatalog
+
+    sampleN<-varCat$SAMPLE[varCat$Cancer.Type==Cancer_Type]
+
+    varCat<-varCat[which(is.element(varCat$SAMPLE,sampleN)),]
+  }
+
+  if(length(GenesToConsider)>0){
+    varCat<-varCat[which(is.element(varCat$gene_symbol,GenesToConsider)),]
+  }
+
+  if(length(VariantsToConsider)>0){
+    sigs<-paste(varCat$gene_symbol,varCat$cdna_mutation,varCat$AA)
+    varCat<-varCat[which(is.element(sigs,VariantsToConsider)),]
+  }
+
+  allSamples<-sort(unique(varCat$SAMPLE))
+
+  allGenes<-sort(unique(varCat$gene_symbol))
+
+  BEM<-do.call(what = cbind,lapply(allSamples,function(x){
+    is.element(allGenes,varCat$gene_symbol[varCat$SAMPLE==x])+0
+  }))
+
+  rownames(BEM)<-allGenes
+  colnames(BEM)<-allSamples
+
+  return(BEM)
+}
+
 
 CELLector.CMPs_getModelAnnotation <- function(URL='https://cog.sanger.ac.uk/cmp/download/model_list_latest.csv.gz'){
   if(url.exists(URL)){
@@ -989,6 +955,24 @@ CELLector.CMPs_getVariants <- function(URL='https://cog.sanger.ac.uk/cmp/downloa
     X <- NULL
   }
   return(X)
+}
+
+CELLector.hms_look_up <- function(hms_ID, hmsId_decode, TCGALabel) {
+
+  cnaKEY16<-hmsId_decode
+  CancerSpecificData <- cnaKEY16 %>% filter(Cancer.Types == paste(TCGALabel))
+
+  if (length(hms_ID) == 1) {
+
+    info <- CancerSpecificData %>% filter(hms_id == paste0(hms_ID))
+
+  } else if (length(hms_ID) > 1) {
+
+    info <- CancerSpecificData %>% filter(hms_id %in% hms_ID)
+  }
+
+  return(info)
+
 }
 
 
