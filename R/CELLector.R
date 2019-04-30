@@ -1170,11 +1170,10 @@ createRuleFromNode<-function(NavTab,nodeIdx){
 
       SIGNATURE<-paste(currentTerm,SIGNATURE,sep=', ')
 
-
       EcurrentTerm<-str_trim(as.character(NavTab$Items[pos]))
       EurrentTerm<-paste(paste(prefix,unlist(str_split(currentTerm,', ')),sep=''),collapse=', ')
 
-      #EcurrentTerm<-paste(prefix,NavTab$Items[pos],sep='')
+      EcurrentTerm<-paste(prefix,NavTab$Items[pos],sep='')
       encodedSIGNATURE<-paste(EcurrentTerm,encodedSIGNATURE,sep=', ')
     }
 
