@@ -87,64 +87,68 @@ CELLector.solveFormula<-function(RULE,dataset,To_beExcluded=NULL){
   tdataset<-tdataset[setdiff(rownames(tdataset),To_beExcluded),]
 
 
-  dRULE<-str_replace_all(RULE,', ','-X-X-X-')
+  #dRULE<-str_replace_all(RULE,', ','-X-X-X-')
 
-  tokenize<-unlist(str_split(dRULE,' '))
-  tokenize<-tokenize[tokenize!='']
+  dRULE<-RULE
+  tokenize<-unlist(str_split(dRULE,', '))
+  #tokenize<-tokenize[tokenize!='']
   ortok<-tokenize
-  ortok<-str_replace_all(ortok,'-X-X-X-',', ')
+  #ortok<-str_replace_all(ortok,'-X-X-X-',', ')
 
-  Id_of_multipleVar<-grep('-X-X-X-',tokenize)
+  #Id_of_multipleVar<-grep('-X-X-X-',tokenize)
 
   NegVar<-grep('~',tokenize)
   PosVar<-setdiff(1:length(tokenize),NegVar)
 
-  NegVarMultiple<-intersect(NegVar,Id_of_multipleVar)
-  PosVarMultiple<-intersect(PosVar,Id_of_multipleVar)
+  #NegVarMultiple<-intersect(NegVar,Id_of_multipleVar)
+  #PosVarMultiple<-intersect(PosVar,Id_of_multipleVar)
+
+  #NegVarMultiple<-NULLintersect(NegVar,Id_of_multipleVar)
+  #PosVarMultiple<-NULLintersect(PosVar,Id_of_multipleVar)
 
   tokenize<-str_replace_all(tokenize,'~','')
 
-  NegVarIndividual<-tokenize[setdiff(NegVar,NegVarMultiple)]
-  PosVarIndividual<-tokenize[setdiff(PosVar,PosVarMultiple)]
+  #NegVarIndividual<-tokenize[setdiff(NegVar,NegVarMultiple)]
+  #PosVarIndividual<-tokenize[setdiff(PosVar,PosVarMultiple)]
+  #
+  # if(length(PosVarMultiple)>0){
+  #   currentMultiple<-tokenize[PosVarMultiple]
+  #   individualMultiple<-unlist(str_split(tokenize[PosVarMultiple],'-X-X-X-'))
+  #   NewTokenizePos<-setdiff(c(setdiff(tokenize,tokenize[PosVarMultiple]),individualMultiple),NegVarIndividual)
+  # }else{
+  #   NewTokenizePos<-NULL
+  # }
+  #
+  # if(length(NegVarMultiple)>0){
+  #   currentMultiple<-tokenize[NegVarMultiple]
+  #   individualMultiple<-unlist(str_split(tokenize[NegVarMultiple],'-X-X-X-'))
+  #   NewTokenizeNeg<-setdiff(c(setdiff(tokenize,tokenize[NegVarMultiple]),individualMultiple),PosVarIndividual)
+  # }else{
+  #   NewTokenizeNeg<-NULL
+  # }
 
-  if(length(PosVarMultiple)>0){
-    currentMultiple<-tokenize[PosVarMultiple]
-    individualMultiple<-unlist(str_split(tokenize[PosVarMultiple],'-X-X-X-'))
-    NewTokenizePos<-setdiff(c(setdiff(tokenize,tokenize[PosVarMultiple]),individualMultiple),NegVarIndividual)
-  }else{
-    NewTokenizePos<-NULL
-  }
-
-  if(length(NegVarMultiple)>0){
-    currentMultiple<-tokenize[NegVarMultiple]
-    individualMultiple<-unlist(str_split(tokenize[NegVarMultiple],'-X-X-X-'))
-    NewTokenizeNeg<-setdiff(c(setdiff(tokenize,tokenize[NegVarMultiple]),individualMultiple),PosVarIndividual)
-  }else{
-    NewTokenizeNeg<-NULL
-  }
-
-  if(length(grep('-X-X-X-',tokenize))>0){
-    tokenize<-tokenize[-grep('-X-X-X-',tokenize)]
-  }
-
-  if(length(grep('-X-X-X-',NewTokenizePos))>0){
-    NewTokenizePos<-NewTokenizePos[-grep('-X-X-X-',NewTokenizePos)]
-  }
-
-  if(length(grep('-X-X-X-',NewTokenizeNeg))>0){
-    NewTokenizeNeg<-NewTokenizeNeg[-grep('-X-X-X-',NewTokenizeNeg)]
-  }
-
-  newNegVar<-sort(union(setdiff(NewTokenizeNeg,NewTokenizePos),NegVarIndividual))
-  newPosVar<-sort(union(setdiff(NewTokenizePos,NewTokenizeNeg),PosVarIndividual))
-
-  tokenize<-union(newNegVar,newPosVar)
-
-  tokenize<-sort(tokenize)
-
-
-  PosVar<-match(newPosVar,tokenize)
-  NegVar<-match(newNegVar,tokenize)
+  # if(length(grep('-X-X-X-',tokenize))>0){
+  #   tokenize<-tokenize[-grep('-X-X-X-',tokenize)]
+  # }
+  #
+  # if(length(grep('-X-X-X-',NewTokenizePos))>0){
+  #   NewTokenizePos<-NewTokenizePos[-grep('-X-X-X-',NewTokenizePos)]
+  # }
+  #
+  # if(length(grep('-X-X-X-',NewTokenizeNeg))>0){
+  #   NewTokenizeNeg<-NewTokenizeNeg[-grep('-X-X-X-',NewTokenizeNeg)]
+  # }
+  #
+  # newNegVar<-sort(union(setdiff(NewTokenizeNeg,NewTokenizePos),NegVarIndividual))
+  # newPosVar<-sort(union(setdiff(NewTokenizePos,NewTokenizeNeg),PosVarIndividual))
+  #
+  # tokenize<-union(newNegVar,newPosVar)
+  #
+  # tokenize<-sort(tokenize)
+  #
+  #
+  # PosVar<-match(newPosVar,tokenize)
+  # NegVar<-match(newNegVar,tokenize)
 
   tdataset<-t(tdataset)
 
@@ -152,10 +156,8 @@ CELLector.solveFormula<-function(RULE,dataset,To_beExcluded=NULL){
   notPresentNegVar<-setdiff(tokenize[NegVar],rownames(tdataset))
 
   if(length(notPresentNegVar)>0){
-
     toAdd<-matrix(0,length(notPresentNegVar),ncol(tdataset),dimnames = list(notPresentNegVar,colnames(tdataset)))
     tdataset<-rbind(tdataset,toAdd)
-
   }
 
   if(length(notPresentPosVar)==0){
@@ -169,7 +171,6 @@ CELLector.solveFormula<-function(RULE,dataset,To_beExcluded=NULL){
   }else{
     return(list(PS=NULL,N=0,PERC=0))
   }
-
 }
 CELLector.buildModelMatrix<-function(Sigs,dataset,searchSpace){
 
