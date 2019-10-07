@@ -50,7 +50,7 @@ Hanna Najgebauer and Francesco Iorio
 }
 \examples{
 data(CELLector.PrimTum.BEMs)
-CELLector.mostSupported_CFEs(transactions = t(CELLector.PrimTum.BEMs$COREAD),
+RES<-CELLector.mostSupported_CFEs(transactions = t(CELLector.PrimTum.BEMs$COREAD),
                              minlen = 2)
 }
 % Add one or more standard keywords, see file 'KEYWORDS' in the
