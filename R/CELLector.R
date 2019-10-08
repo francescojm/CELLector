@@ -770,6 +770,8 @@ CELLector.CELLline_buildBEM <- function(varCat=NULL,
   if(length(varCat)==0){
     varCat<-CELLector.CMPs_getVariants()
     clAnnotation<-CELLector.CMPs_getModelAnnotation()
+    clAnnotation$cancer_type_detail<-
+      str_sub(clAnnotation$cancer_type_detail,3,end = str_length(clAnnotation$cancer_type_detail)-3)
 
     if(!excludeOrganoids){
       id<-which(clAnnotation$tissue==Tissue & is.element(clAnnotation$cancer_type,Cancer_Type))
