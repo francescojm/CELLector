@@ -5,6 +5,7 @@ import(data.tree)
 import(grDevices)
 import(RCurl)
 import(readr)
+import(xfun)
 
 importFrom("methods", "as")
 importFrom("stats", "start")
