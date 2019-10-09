@@ -8,7 +8,7 @@ Description: Functions to select the most relevant cancer cell lines to be inclu
 License: MIT
 Encoding: UTF-8
 LazyData: true
-Depends: arules, dplyr, stringr, data.tree, sunburstR, igraph, collapsibleTree, methods, RCurl, xfun
+Depends: arules, dplyr, stringr, data.tree, sunburstR, igraph, collapsibleTree, methods, RCurl
 Suggests: knitr,
     rmarkdown
 VignetteBuilder: knitr
