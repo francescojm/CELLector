@@ -15,13 +15,13 @@ License: MIT
 CELLector can be used in three different modalities:
   - (i) as an R package (within R, code available at: https://github.com/francescojm/CELLector)
   
-  - (ii) as an online R shiny App (available at: https://ot-cellector.shinyapps.io/CELLector_App/)*,
+  - (ii) as an online R shiny App (available at: https://ot-cellector.shinyapps.io/CELLector_App/)**,
   
   - (iii) running the R shiny App locally (within Rstudio, code available at: https://github.com/francescojm/CELLector_App).
 
 A tutorial on how to use the online Rshiny app (containing also instruction on how to run it locally) is available here: https://www.biorxiv.org/highwire/filestream/92891/field_highwire_adjunct_files/0/275032-1.pdf
 
-* This has been temporarily deployed on a public Rshiny Server, which comes with a monthly time usage limitation. Deployment on a corporative server is in progress. If time limit has been reached, thus the online version of the App is down please refer to the (iii) modality. 
+  ** This has been temporarily deployed on a public Rshiny Server, which comes with a monthly time usage limitation. Deployment on a corporative server is in progress. If time limit has been reached, thus the online version of the App is down, please refer to the (iii) modality. 
 
 ![alt text](www/preview1.png)
 
