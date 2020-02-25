@@ -19,6 +19,9 @@ A data frame mapping chromosomal regions of recurrent copy number amplifications
 [2] van Dyk, E., Reinders, M. J. T. & Wessels, L. F. A. A scale-space method for detecting recurrent DNA copy number changes with analytical false discovery rate control. Nucleic Acids Res. 41, e100 (2013).
 
 }
+\author{
+Francesco Iorio (fi9232@gmail.com)
+}
 \examples{
 data(CELLector.CFEs.CNAid_mapping)
 head(CELLector.CFEs.CNAid_mapping)

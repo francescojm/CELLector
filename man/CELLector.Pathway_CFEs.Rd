@@ -15,6 +15,9 @@ Named list of string vectors, whose elements are CFEs involving genes in a fixed
 \references{
 [1] Iorio, F. et al. A Landscape of Pharmacogenomic Interactions in Cancer. Cell 166, 740–754 (2016).
 }
+\author{
+Francesco Iorio (fi9232@gmail.com)
+}
 \examples{
 data(CELLector.Pathway_CFEs)
 CELLector.Pathway_CFEs$`RAS-RAF-MEK-ERK / JNK signaling`

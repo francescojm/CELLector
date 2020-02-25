@@ -33,6 +33,9 @@ data(CELLector.CellLine.BEMs)
 CELLector.CellLine.BEMs$COREAD[1:10,
                                c("COSMIC_identifier","CellLine",'BRAF','KRAS','cna27')]
 }
+\author{
+Francesco Iorio (fi9232@gmail.com)
+}
 \seealso{
 \code{\link{CELLector.PrimTum.BEMs}}, \code{\link{CELLector.CFEs}}, \code{\link{CELLector.CFEs.CNAid_decode}}
 }

@@ -16,6 +16,9 @@ A named vector of string with one entry per cell lines (with COSMIC [2] identifi
 
 [2] Forbes, S. A. et al. COSMIC: exploring the world’s knowledge of somatic mutations in human cancer. Nucleic Acids Res. 43, D805–11 (2015
 }
+\author{
+Francesco Iorio (fi9232@gmail.com)
+}
 \examples{
 data(CELLector.MSIstatus)
 head(CELLector.MSIstatus)

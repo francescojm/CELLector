@@ -30,6 +30,9 @@ Please note that the same RACS identifier across multiple cancer types might ind
 data(CELLector.PrimTum.BEMs)
 CELLector.PrimTum.BEMs$COREAD[c('BRAF','KRAS','cna27'),1:10]
 }
+\author{
+Francesco Iorio (fi9232@gmail.com)
+}
 \seealso{
 \code{\link{CELLector.CellLine.BEMs}}, \code{\link{CELLector.CFEs}}, \code{\link{CELLector.CFEs.CNAid_decode}}
 }

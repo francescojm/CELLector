@@ -466,8 +466,6 @@ CELLector.Score <- function(NavTab, CELLlineData,alfa=0.75){
 
       CELLectorScore <- alfa*normalizedSigLenght+beta*tabCSS[g,2]
 
-
-
       CELLectorScore <- alfa*normalizedSigLenght+beta*tabCSS[g,2]
 
       vecScores[g] <- CELLectorScore
@@ -524,6 +522,8 @@ CELLector.Score <- function(NavTab, CELLlineData,alfa=0.75){
     print('Error: alfa needs to be >=0 and <=1')
   }
 }
+
+
 CELLector.Build_Search_Space<-function(ctumours,
                                        cancerType,
                                        minlen=1,
@@ -1258,75 +1258,6 @@ createNode<-function(SystemStack,
     return(NULL)
   }
 }
-
-# createNode<-function(SystemStack,
-#                      transactions,
-#                      currentPoints,
-#                      currentFeatures,
-#                      Index,
-#                      Type,
-#                      Parent.Idx,maxId,
-#                      globalSupport=0.02,
-#                      minlen=1,ctype,
-#                      cnaId_decode,
-#                      cdg=NULL){
-#
-#   nodeIdx<-maxId+1
-#
-#   if(length(currentFeatures)==1 | length(currentPoints)==1){
-#     currentDataset<-matrix(transactions[currentPoints,currentFeatures],
-#                            length(currentPoints),length(currentFeatures),
-#                            dimnames = list(currentPoints,currentFeatures))
-#   }else{
-#     currentDataset<-transactions[currentPoints,currentFeatures]
-#   }
-#
-#
-#   nsamples<-ceiling(globalSupport*nrow(transactions))
-#
-#   minSupport<-nsamples/nrow(currentDataset)
-#
-#   if(minSupport<1 & sum(unlist(c(currentDataset)))>0){
-#
-#     RES<-CELLector.mostSupported_CFEs(transactions = currentDataset,
-#                                       minSupport = minSupport,
-#                                       minlen = minlen)
-#
-#     if (length(RES$MSIS)==0){
-#       return(NULL)
-#     }else{
-#
-#
-#       IS<-RES$MSIS
-#
-#       dIS<-decodeCNAs(ctype = ctype,codedCNA = IS, cnaId_decode = cnaId_decode, cdg = cdg)
-#
-#       if(length(IS)==1){
-#         gs<-sum(transactions[,IS])/nrow(transactions)
-#       }else{
-#         gs<-sum(rowSums(transactions[,IS])==length(IS))/nrow(transactions)
-#       }
-#
-#       nNODE<-
-#         list(Idx=nodeIdx,
-#              currentPoints=currentPoints,
-#              positivePoints=RES$supportingSamples,
-#              currentFeatures=currentFeatures,
-#              ItemSet=RES$MSIS,
-#              decodedIS=dIS,
-#              Type=Type,
-#              Parent.Idx=Parent.Idx,
-#              AbsSupport=RES$absSUPPORT,
-#              CurrentTotal=length(currentPoints),
-#              PercSupport=RES$SUPPORT,
-#              GlobalSupport=RES$absSUPPORT/nrow(transactions))
-#
-#       return(nNODE)
-#     }
-#   }else{
-#     return(NULL)
-#   }
-# }
 
 decodeSIG<-function(ctype,codedSIG,cnaId_decode,hmsId_decode=NULL,cdg){
   IS<-codedSIG

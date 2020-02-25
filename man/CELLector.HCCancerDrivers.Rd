@@ -14,6 +14,9 @@ A list of high confidence cancer driver genes from [1]
 \references{
 [1] Iorio, F. et al. A Landscape of Pharmacogenomic Interactions in Cancer. Cell 166, 740–754 (2016).
 }
+\author{
+Francesco Iorio (fi9232@gmail.com)
+}
 \examples{
 data(CELLector.HCCancerDrivers)
 ## maybe str(CELLector.HCCancerDrivers) ; plot(CELLector.HCCancerDrivers) ...

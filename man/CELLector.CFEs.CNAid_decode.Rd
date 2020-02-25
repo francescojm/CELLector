@@ -48,6 +48,9 @@ CELLector.cna_look_up(cna_ID = colnames(CELLector.CellLine.BEMs$COREAD)[8],
                       TCGALabel = 'COREAD',
                       cnaId_decode = CELLector.CFEs.CNAid_decode)
 }
+\author{
+Francesco Iorio (fi9232@gmail.com)
+}
 \seealso{
 \code{CELLector.CellLine.BEMs}, \code{CELLector.PrimTum.BEMs}, \code{CELLector.cna_look_up}
 
