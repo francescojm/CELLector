@@ -39,6 +39,7 @@ Hanna Najgebauer and Francesco Iorio
 \code{\link{CELLector.CFEs.CNAid_decode}}
 }
 \examples{
+data(CELLector.CFEs.CNAid_decode)
 CELLector.cna_look_up(cna_ID='cna26',
                       cnaId_decode = CELLector.CFEs.CNAid_decode,
                       TCGALabel = 'BRCA')

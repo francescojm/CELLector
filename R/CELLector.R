@@ -50,6 +50,23 @@ CELLector.cna_look_up <- function(cna_ID, cnaId_decode, TCGALabel) {
   return(info)
 
 }
+CELLector.hms_look_up <- function(hms_ID, hmsId_decode, TCGALabel) {
+
+  cnaKEY16<-hmsId_decode
+  CancerSpecificData <- cnaKEY16 %>% filter(Cancer.Types == paste(TCGALabel))
+
+  if (length(hms_ID) == 1) {
+
+    info <- CancerSpecificData %>% filter(hms_id == paste0(hms_ID))
+
+  } else if (length(hms_ID) > 1) {
+
+    info <- CancerSpecificData %>% filter(hms_id %in% hms_ID)
+  }
+
+  return(info)
+
+}
 CELLector.unicizeSamples<-function(ctumours,keepReplicates=TRUE){
   if (keepReplicates){
     colnames(ctumours)<-paste(colnames(ctumours),'_',1:ncol(ctumours),sep='')
@@ -423,9 +440,6 @@ CELLector.changeSScolors<-function(searchSpace){
 
   return(searchSpace)
 }
-
-
-## Exported non Documented functions
 CELLector.Score <- function(NavTab, CELLlineData,alfa=0.75){
 
   if(alfa>=0 & alfa<=1){
@@ -523,6 +537,8 @@ CELLector.Score <- function(NavTab, CELLlineData,alfa=0.75){
   }
 }
 
+
+## documentation to be updated
 
 CELLector.Build_Search_Space<-function(ctumours,
                                        cancerType,
@@ -751,6 +767,9 @@ CELLector.Build_Search_Space<-function(ctumours,
   NT<-cbind(NT,COLORS)
   return(list(navTable=NT,TreeRoot=nROOT))
 }
+
+## Exported non Documented functions
+
 CELLector.CELLline_buildBEM <- function(varCat=NULL,
                                         Tissue,
                                         Cancer_Type,
@@ -955,23 +974,14 @@ CELLector.CMPs_getVariants <- function(URL='https://cog.sanger.ac.uk/cmp/downloa
   return(X)
 }
 
-CELLector.hms_look_up <- function(hms_ID, hmsId_decode, TCGALabel) {
 
-  cnaKEY16<-hmsId_decode
-  CancerSpecificData <- cnaKEY16 %>% filter(Cancer.Types == paste(TCGALabel))
 
-  if (length(hms_ID) == 1) {
+### not documented data objects:
 
-    info <- CancerSpecificData %>% filter(hms_id == paste0(hms_ID))
-
-  } else if (length(hms_ID) > 1) {
-
-    info <- CancerSpecificData %>% filter(hms_id %in% hms_ID)
-  }
-
-  return(info)
-
-}
+## CELLector.CellLine.BEMs_v2
+## CELLector.PrimTum.BEMs_v2
+## CELLector.CFEsV2
+## CELLector.CFEs.HMSid_decode
 
 
 ## not Exported functions
