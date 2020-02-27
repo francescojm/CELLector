@@ -537,6 +537,14 @@ CELLector.Score <- function(NavTab, CELLlineData,alfa=0.75){
   }
 }
 
+CELLector.CMPs_getModelAnnotation <- function(URL='https://cog.sanger.ac.uk/cmp/download/model_list_latest.csv.gz'){
+  if(url.exists(URL)){
+    X <- read_csv(URL)
+  }else{
+    X <- NULL
+  }
+  return(X)
+}
 
 ## documentation to be updated
 
@@ -946,15 +954,6 @@ CELLector.Tumours_buildBEM <- function(varCat=NULL,
   return(BEM)
 }
 
-
-CELLector.CMPs_getModelAnnotation <- function(URL='https://cog.sanger.ac.uk/cmp/download/model_list_latest.csv.gz'){
-  if(url.exists(URL)){
-    X <- read_csv(URL)
-  }else{
-    X <- NULL
-  }
-  return(X)
-}
 CELLector.CMPs_getDriverGenes <- function(URL='https://cog.sanger.ac.uk/cmp/download/cancer_genes_latest.csv.gz'){
   if(url.exists(URL)){
     X <- read_csv(URL)
