@@ -15,7 +15,7 @@ CELLector.Tumours_buildBEM(varCat = NULL,
 }
 \arguments{
   \item{varCat}{
-    A data frame containing a catalogue of somatic genomic variants observed in primary tumours. The format should be the same of the \code{CELLector.PrimTumVarCatalog} data object (which is used when this parameter is set to its default \code{NULL} value) or at least contain the following column headers \code{SAMPLE}, \code{Cancer.Type}, \code{Gene}, \code{cDNA}, \code{AA}, \code{Recurrence.Filter}
+    A data frame containing a catalogue of somatic genomic variants observed in primary tumours, with one row per variant. The format should be the same of the \code{CELLector.PrimTumVarCatalog} data object (which is used when this parameter is set to its default \code{NULL} value) or at least contain the following column headers \code{SAMPLE}, \code{Cancer.Type}, \code{Gene}, \code{cDNA}, \code{AA}, \code{Recurrence.Filter}
 
 }
   \item{Cancer_Type}{

@@ -849,11 +849,13 @@ CELLector.CELLline_buildBEM <- function(varCat=NULL,
                                         GenesToConsider=NULL,
                                         VariantsToConsider=NULL){
 
+
+  clAnnotation<-CELLector.CMPs_getModelAnnotation()
+  clAnnotation$cancer_type_detail<-
+    str_sub(clAnnotation$cancer_type_detail,3,end = str_length(clAnnotation$cancer_type_detail)-3)
+
   if(length(varCat)==0){
     varCat<-CELLector.CMPs_getVariants()
-    clAnnotation<-CELLector.CMPs_getModelAnnotation()
-    clAnnotation$cancer_type_detail<-
-      str_sub(clAnnotation$cancer_type_detail,3,end = str_length(clAnnotation$cancer_type_detail)-3)
 
     if(!excludeOrganoids){
       id<-which(clAnnotation$tissue==Tissue & is.element(clAnnotation$cancer_type,Cancer_Type))
@@ -872,9 +874,6 @@ CELLector.CELLline_buildBEM <- function(varCat=NULL,
       varCat<-varCat[which(is.element(varCat$model_id,cls)),]
       clAnnotation<-clAnnotation[which(is.element(clAnnotation$model_id,cls)),]
     }
-
-
-
 
     if(length(sample_site)>0){
       id<-which(is.element(clAnnotation$sample_site,sample_site))
@@ -922,8 +921,6 @@ CELLector.CELLline_buildBEM <- function(varCat=NULL,
       clAnnotation<-clAnnotation[which(is.element(clAnnotation$model_id,cls)),]
     }
 
-
-
     if(length(ploidy_th)>0){
       id<-which(round(clAnnotation$ploidy)>=ploidy_th[1] & round(clAnnotation$ploidy)<=ploidy_th[2])
       cls<-clAnnotation$model_id[id]
@@ -937,18 +934,17 @@ CELLector.CELLline_buildBEM <- function(varCat=NULL,
       varCat<-varCat[which(is.element(varCat$model_id,cls)),]
       clAnnotation<-clAnnotation[which(is.element(clAnnotation$model_id,cls)),]
     }
-
-    if(length(GenesToConsider)>0){
-      varCat<-varCat[which(is.element(varCat$gene_symbol,GenesToConsider)),]
-    }
-
-    if(length(VariantsToConsider)>0){
-      sigs<-paste(varCat$gene_symbol,varCat$cdna_mutation,paste('p.',varCat$aa_mutation,sep=''))
-      varCat<-varCat[which(is.element(sigs,VariantsToConsider)),]
-    }
   }
 
- # print(sort(cls))
+
+  if(length(GenesToConsider)>0){
+    varCat<-varCat[which(is.element(varCat$gene_symbol,GenesToConsider)),]
+  }
+
+  if(length(VariantsToConsider)>0){
+    sigs<-paste(varCat$gene_symbol,varCat$cdna_mutation,paste('p.',varCat$aa_mutation,sep=''))
+    varCat<-varCat[which(is.element(sigs,VariantsToConsider)),]
+  }
 
   allModels<-sort(unique(varCat$model_id))
   allModel_ids<-varCat$model_id[match(allModels,varCat$model_id)]
@@ -965,8 +961,6 @@ CELLector.CELLline_buildBEM <- function(varCat=NULL,
   BEM<-data.frame(CMP_identifier=allModel_ids,
                   CellLine=cls,
                   t(BEM))
-
-
 
   return(BEM)
 }
