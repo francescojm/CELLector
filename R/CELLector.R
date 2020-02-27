@@ -563,6 +563,44 @@ CELLector.CMPs_getVariants <- function(URL='https://cog.sanger.ac.uk/cmp/downloa
   }
   return(X)
 }
+
+CELLector.Tumours_buildBEM <- function(varCat=NULL,
+                                       Cancer_Type,
+                                       GenesToConsider=NULL,
+                                       VariantsToConsider=NULL){
+
+
+  if(length(varCat)==0){
+    data(CELLector.PrimTumVarCatalog)
+    varCat<-CELLector.PrimTumVarCatalog
+
+    sampleN<-varCat$SAMPLE[varCat$Cancer.Type==Cancer_Type]
+
+    varCat<-varCat[which(is.element(varCat$SAMPLE,sampleN)),]
+  }
+
+  if(length(GenesToConsider)>0){
+    varCat<-varCat[which(is.element(varCat$Gene,GenesToConsider)),]
+  }
+
+  if(length(VariantsToConsider)>0){
+    sigs<-paste(varCat$Gene,varCat$cDNA,varCat$AA)
+    varCat<-varCat[which(is.element(sigs,VariantsToConsider)),]
+  }
+
+  allSamples<-sort(unique(varCat$SAMPLE))
+
+  allGenes<-sort(unique(varCat$Gene))
+
+  BEM<-do.call(what = cbind,lapply(allSamples,function(x){
+    is.element(allGenes,varCat$Gene[varCat$SAMPLE==x])+0
+  }))
+
+  rownames(BEM)<-allGenes
+  colnames(BEM)<-allSamples
+
+  return(BEM)
+}
 ## documentation to be updated
 
 CELLector.Build_Search_Space<-function(ctumours,
@@ -933,46 +971,6 @@ CELLector.CELLline_buildBEM <- function(varCat=NULL,
   return(BEM)
 }
 
-CELLector.Tumours_buildBEM <- function(varCat=NULL,
-                                       Cancer_Type,
-                                       GenesToConsider=NULL,
-                                       VariantsToConsider=NULL){
-
-
-  if(length(varCat)==0){
-    data(CELLector.PrimTumVarCatalog)
-    varCat<-CELLector.PrimTumVarCatalog
-
-    sampleN<-varCat$SAMPLE[varCat$Cancer.Type==Cancer_Type]
-
-    varCat<-varCat[which(is.element(varCat$SAMPLE,sampleN)),]
-  }
-
-  if(length(GenesToConsider)>0){
-    varCat<-varCat[which(is.element(varCat$Gene,GenesToConsider)),]
-  }
-
-  if(length(VariantsToConsider)>0){
-    sigs<-paste(varCat$Gene,varCat$cDNA,varCat$AA)
-    varCat<-varCat[which(is.element(sigs,VariantsToConsider)),]
-  }
-
-  allSamples<-sort(unique(varCat$SAMPLE))
-
-  allGenes<-sort(unique(varCat$Gene))
-
-  BEM<-do.call(what = cbind,lapply(allSamples,function(x){
-    is.element(allGenes,varCat$Gene[varCat$SAMPLE==x])+0
-  }))
-
-  rownames(BEM)<-allGenes
-  colnames(BEM)<-allSamples
-
-  return(BEM)
-}
-
-
-
 
 
 ### not documented data objects:
@@ -981,6 +979,7 @@ CELLector.Tumours_buildBEM <- function(varCat=NULL,
 ## CELLector.PrimTum.BEMs_v2
 ## CELLector.CFEsV2
 ## CELLector.CFEs.HMSid_decode
+## CELLector.PrimTumVarCatalog
 
 
 ## not Exported functions
