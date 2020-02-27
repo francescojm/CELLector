@@ -5,7 +5,7 @@
 Building a Genomic Binary Event Matrix (BEM) for in-vitro models
 }
 \description{
-%%  ~~ A concise (1-5 lines) description of what the function does. ~~
+This function takes in input a catalogue of somatic genomic variants observed in cancer cell lines (or it uses the most recent catalogue of somatic genomic variants from the Cell Model Passports [1]) and it converts it into a presence/absence (binary) matrix, which can be processed by the CELLector package and CELLector shiny app for mapping cell lines onto cancer-patient derived genomic subtypes.
 }
 \usage{
 CELLector.CELLline_buildBEM(varCat = NULL,
@@ -28,51 +28,72 @@ CELLector.CELLline_buildBEM(varCat = NULL,
 \arguments{
   \item{varCat}{
   A data frame containing a catalogue of somatic genomic variants observed in cancer cell lines with one row per variant. At least the following column/headers should be included: \code{model_id} (the Cell Model Passport identifier [1] of the cell line in which the variant is observed), \code{gene_symbol} (HUGO [2] symbol of the gene hosting the variant), \code{cdna_mutation} (variant specification based on the longest transcript of the gene), \code{aa_mutation} (aminoacid substitution). See format of the \code{CELLector.RecfiltVariants} object for details on the syntax of the variant and aminoacid substitution specifications.
-When this parameter is different from \code{NULL} all the following parameters are ignored by this function, with the exception of \code{GenesToConsider} and \code{VariantsToConsider}.
-
+When this parameter is different from \code{NULL} all the others parameters are ignored by this function, with the exception of \code{GenesToConsider} and \code{VariantsToConsider}. By default, this parameter is set to \code{NULL} and the most up-to-date variant catalogue from the Cell Model Passports [1] is used insted. In this case the other parameters define which samples to include in the final genomic binary event matrix.
 }
   \item{Tissue}{
-
+  String specifying the tissue of origin of the cell lines that should be considering while assembling the final genomic binary event matrix. Possible values are those specified in the \code{tissue} column of the Cell Model Passport [1] annotation object, downloadable through the \code{CELLector.CMPs_getModelAnnotation} function.
+      This parameter is used only when \code{varCat} is not set to its default \code{NULL} value, therefore the most-up-to-date variant catalogue from the
+  Cell Model Passports [1] is used instead of a variant catalogue provided in input.
 }
   \item{Cancer_Type}{
-%%     ~~Describe \code{Cancer_Type} here~~
+  String (or vector of strings) specifying the cancer type(s) of origin of the cell lines that should be considering while assembling the final genomic binary event matrix. Possible values are those specified in the \code{cancer_type} column of the Cell Model Passport [1] annotation object, downloadable through the \code{CELLector.CMPs_getModelAnnotation} function.
+    This parameter is used only when \code{varCat} is not set to its default \code{NULL} value, therefore the most-up-to-date variant catalogue from the
+  Cell Model Passports [1] is used instead of a variant catalogue provided in input.
 }
   \item{Cancer_Type_details}{
-%%     ~~Describe \code{Cancer_Type_details} here~~
+  String (or vector of strings) specifying the cancer type detail(s) of the cell lines that should be considering while assembling the final genomic binary event matrix. Possible values are those specified in the \code{cancer_type_detail} column of the Cell Model Passport [1] annotation object, downloadable through the \code{CELLector.CMPs_getModelAnnotation} function.
+    This parameter is used only when \code{varCat} is not set to its default \code{NULL} value, therefore the most-up-to-date variant catalogue from the
+  Cell Model Passports [1] is used instead of a variant catalogue provided in input.
 }
   \item{sample_site}{
-%%     ~~Describe \code{sample_site} here~~
+  String (or vector of strings) specifying the sample site(s) of the cell lines that should be considering while assembling the final genomic binary event matrix. Possible values are those specified in the \code{sample_site} column of the Cell Model Passport [1] annotation object, downloadable through the \code{CELLector.CMPs_getModelAnnotation} function.
+    This parameter is used only when \code{varCat} is not set to its default \code{NULL} value, therefore the most-up-to-date variant catalogue from the
+  Cell Model Passports [1] is used instead of a variant catalogue provided in input.
 }
   \item{excludeOrganoids}{
-%%     ~~Describe \code{excludeOrganoids} here~~
+  Boolean parameter specifying whether organoid models should not be considered while assembling the final genomic binary event matrix.
+    This parameter is used only when \code{varCat} is not set to its default \code{NULL} value, therefore the most-up-to-date variant catalogue from the
+  Cell Model Passports [1] is used instead of a variant catalogue provided in input.
 }
   \item{humanonly}{
-%%     ~~Describe \code{humanonly} here~~
+  Boolean parameter specifying whether human cell lines only should not be considered while assembling the final genomic binary event matrix.
+    This parameter is used only when \code{varCat} is not set to its default \code{NULL} value, therefore the most-up-to-date variant catalogue from the
+  Cell Model Passports [1] is used instead of a variant catalogue provided in input.
 }
   \item{msi_status_select}{
-%%     ~~Describe \code{msi_status_select} here~~
+ String parameter specifying whether microsatellite stable or instable cell lines only should not be considered while assembling the final genomic binary event matrix.
+   Possible values for this parameters are "MSI" (for instable cell lines) and "MSS" (for stable cell lines).
+    This parameter is used only when \code{varCat} is not set its default \code{NULL} value, therefore the most-up-to-date variant catalogue from the
+  Cell Model Passports [1] is used instead of a variant catalogue provided in input.
 }
+
+!@#!@#@#!@#!@#@#!#!@#!@#!@!@#!#!@
+
   \item{gender_select}{
-%%     ~~Describe \code{gender_select} here~~
+    This parameter is used only when \code{varCat} is not set to its default \code{NULL} value, therefore the most-up-to-date variant catalogue from the
+  Cell Model Passports [1] is used instead of a variant catalogue provided in input.
 }
   \item{mutational_burden_th}{
-%%     ~~Describe \code{mutational_burden_th} here~~
+    This parameter is used only when \code{varCat} is not set to its default \code{NULL} value, therefore the most-up-to-date variant catalogue from the
+  Cell Model Passports [1] is used instead of a variant catalogue provided in input.
 }
   \item{age_at_sampling}{
-%%     ~~Describe \code{age_at_sampling} here~~
+    This parameter is used only when \code{varCat} is not set to its default \code{NULL} value, therefore the most-up-to-date variant catalogue from the
+  Cell Model Passports [1] is used instead of a variant catalogue provided in input.
 }
   \item{ploidy_th}{
-%%     ~~Describe \code{ploidy_th} here~~
+    This parameter is used only when \code{varCat} is not set to its default \code{NULL} value, therefore the most-up-to-date variant catalogue from the
+  Cell Model Passports [1] is used instead of a variant catalogue provided in input.
 }
   \item{ethnicity_to_exclude}{
-%%     ~~Describe \code{ethnicity_to_exclude} here~~
+    This parameter is used only when \code{varCat} is not set to its default \code{NULL} value, therefore the most-up-to-date variant catalogue from the
+  Cell Model Passports [1] is used instead of a variant catalogue provided in input.
 }
   \item{GenesToConsider}{
-%%     ~~Describe \code{GenesToConsider} here~~
+
 }
   \item{VariantsToConsider}{
-%%     ~~Describe \code{VariantsToConsider} here~~
-}
+   }
 }
 \details{
 %%  ~~ If necessary, more details than the description above ~~
@@ -100,7 +121,7 @@ When this parameter is different from \code{NULL} all the following parameters a
 %% ~Make other sections like Warning with \section{Warning }{....} ~
 
 \seealso{
-%% ~~objects to See Also as \code{\link{help}}, ~~~
+\code{\link{CELLector.CMPs_getModelAnnotation}}
 }
 \examples{
 ##---- Should be DIRECTLY executable !! ----
