@@ -5,24 +5,27 @@
 CELLector search space construction
 }
 \description{
-This function assembles a user defined CELLector search space analysing genomic data from a larg cohort of cancer patients (spcified in input). It identifies recurrent subtypes with matched genomic signatures (as combination of cancer functional events (CFEs), defined in [1]), linking them into a hierarchical structure shaped as a a binary three with a corresponding navigable table, as detailed in [2].
+This function assembles a user defined CELLector search space analysing genomic data from a larg cohort of cancer patients (specified in input). It identifies recurrent subtypes with matched genomic signatures (as combination of cancer functional events (CFEs), defined in [1]), linking them into a hierarchical structure shaped as a a binary three with a corresponding navigable table, as detailed in [2].
 }
 \usage{
-CELLector.Build_Search_Space(ctumours,
-                             cancerType,
-                             minlen = 1,
-                             verbose = TRUE,
-                             mutOnly = FALSE,
-                             cnaOnly = FALSE,
-                             minGlobSupp = 0.01,
-                             FeatureToExclude = NULL,
-                             pathway_CFEs = NULL,
-                             pathwayFocused = NULL,
-                             subCohortDefinition = NULL,
-                             NegativeDefinition = FALSE,
-                             cnaIdMap,
-                             cnaIdDecode,
-                             cdg)
+CELLector.Build_Search_Space<-function(ctumours,
+                                       cancerType,
+                                       minlen=1,
+                                       verbose=TRUE,
+                                       mutOnly=FALSE,
+                                       cnaOnly=FALSE,
+                                       includeHMS=FALSE,
+                                       minGlobSupp=0.01,
+                                       FeatureToExclude=NULL,
+                                       pathway_CFEs = NULL,
+                                       pathwayFocused=NULL,
+                                       subCohortDefinition=NULL,
+                                       NegativeDefinition=FALSE,
+                                       cnaIdMap=NULL,
+                                       cnaIdDecode=NULL,
+                                       hmsIdDecode=NULL,
+                                       cdg=NULL,
+                                       UD_genomics=FALSE)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
@@ -30,7 +33,7 @@ CELLector.Build_Search_Space(ctumours,
   A binary event matrix (BEM) modeling a cohort of cancer patients. With cancer functional events (CFEs) on the columns and sample identifers on the rows. See \code{\link{CELLector.PrimTum.BEMs}} for further details
 }
   \item{cancerType}{
-  The cancer type under consideration (spcified via a TCGA label): currently available types = \emph{BLCA, BRCA, COREAD, GBM, HNSC, KIRC, LAML, LGG, LUAD, LUSC, OV, PRAD, SKCM, STAD, THCA, UCEC}
+  The cancer type under consideration (specified via a TCGA label): currently available types = \emph{BLCA, BRCA, COREAD, GBM, HNSC, KIRC, LAML, LGG, LUAD, LUSC, OV, PRAD, SKCM, STAD, THCA, UCEC}
 }
   \item{minlen}{
     The minimal length of the genomic signatures (how many indivudal CFEs it is made of) in order to be considered in the analysis (1 by default)
@@ -44,8 +47,11 @@ A boolean argument specifying whether step-by-step information on the algorithm 
   \item{cnaOnly}{
   A boolean argument specifying whether only CFEs involving copy number alterations (CNAs) of chromosomal segments that are recurrently CN altered should be considered in the analysis. If the \code{mutOnly} argument is equal to \code{TRUE} then this must be \code{FALSE} (default value)
 }
+  \item{includeHMS}{
+      !@#!@#!@#!@#!@#!@#!@#!@#!#@!
+}
   \item{minGlobSupp}{
-Minimal size of the outpputted subtypes, as ratio of the number patients included in the whole cohort.
+Minimal size of the outpputted subtypes, as ratio of the number patients included in the whole cohort (1\% by default).
 }
   \item{FeatureToExclude}{
 A string (or a vector of strings) with identifiers of CFEs that should be ignored
@@ -67,6 +73,12 @@ A data frame mapping chromosomal regions of recurrent copy number amplifications
 }
   \item{cnaIdDecode}{
 A table with identifiers of cancer functional events (CFEs) involving chromosomal regions of recurrent copy number alterations (RACSs, as defined by [1], i.e. identified throgh ADMIRE [3]) and their annotation. The built-in object \code{CELLector.CFEs.CNAid_decode} (or an alternative data frame with the same format) should be used.
+}
+  \item{hmsIdDecode}{
+!@#!@#!@#!@#!@#!@#!@#!@#!#@!
+}
+  \item{UD_genomics}{
+!@#!@#!@#!@#!@#!@#!@#!@#!#@!
 }
   \item{cdg}{
 A list of genes that are used when decoding the identifiers of cancer functional events (CFEs) involving chromosomal regions of recurrent copy number alterations (RACSs, as defined by [1]). These will be visualised in the signatures containing the RACSs including them. A predefined list of high confidence cancer driver genes (from [1]) is provided as built-in data object (\code{CELLector.HCCancerDrivers})
