@@ -48,7 +48,7 @@ A boolean argument specifying whether step-by-step information on the algorithm 
   A boolean argument specifying whether only CFEs involving copy number alterations (CNAs) of chromosomal segments that are recurrently CN altered should be considered in the analysis. If the \code{mutOnly} argument is equal to \code{TRUE} then this must be \code{FALSE} (default value)
 }
   \item{includeHMS}{
-      !@#!@#!@#!@#!@#!@#!@#!@#!#@!
+  A boolean argument specitying whether methylation data should be considered while building the searching space (\code{FALSE} by default).
 }
   \item{minGlobSupp}{
 Minimal size of the outpputted subtypes, as ratio of the number patients included in the whole cohort (1\% by default).
@@ -75,10 +75,10 @@ A data frame mapping chromosomal regions of recurrent copy number amplifications
 A table with identifiers of cancer functional events (CFEs) involving chromosomal regions of recurrent copy number alterations (RACSs, as defined by [1], i.e. identified throgh ADMIRE [3]) and their annotation. The built-in object \code{CELLector.CFEs.CNAid_decode} (or an alternative data frame with the same format) should be used.
 }
   \item{hmsIdDecode}{
-!@#!@#!@#!@#!@#!@#!@#!@#!#@!
+  Data frame containing annotation for the hypermethylated gene promoters CFEs. The format should be the same of the \code{CELLector.CFEs.HMSid_decode} object.
 }
   \item{UD_genomics}{
-!@#!@#!@#!@#!@#!@#!@#!@#!#@!
+  A boolean argument specifying whether the analysis is performed on user defined genomic data (\code{TRUE}) or CELLector buit-in genomic data (\code{FALSE}, default value).
 }
   \item{cdg}{
 A list of genes that are used when decoding the identifiers of cancer functional events (CFEs) involving chromosomal regions of recurrent copy number alterations (RACSs, as defined by [1]). These will be visualised in the signatures containing the RACSs including them. A predefined list of high confidence cancer driver genes (from [1]) is provided as built-in data object (\code{CELLector.HCCancerDrivers})
@@ -148,13 +148,9 @@ data(CELLector.Pathway_CFEs)
 data(CELLector.CFEs.CNAid_mapping)
 data(CELLector.CFEs.CNAid_decode)
 data(CELLector.HCCancerDrivers)
-data(CELLector.CellLine.BEMs)
-
 
 ### Change the following two lines to work with a different cancer type
 tumours_BEM<-CELLector.PrimTum.BEMs$COREAD
-CELLlineData<-CELLector.CellLine.BEMs$COREAD
-
 
 ### unicize the sample identifiers for the tumour data
 tumours_BEM<-CELLector.unicizeSamples(tumours_BEM)
@@ -174,6 +170,46 @@ CSS<-CELLector.Build_Search_Space(ctumours = t(tumours_BEM),
                                   cdg = CELLector.HCCancerDrivers,
                                   subCohortDefinition='TP53',
                                   NegativeDefinition=TRUE)
+
+### visualising the CELLector searching space as a binary tree
+CSS$TreeRoot
+
+### visualising the first attributes of the tree nodes
+CSS$navTable[,1:11]
+
+### visualising the sub-cohort of patients whose genome satisfies the rule of the 4th node
+str_split(CSS$navTable$positivePoints[4],',')
+
+
+######################################################################
+### Rebuilding the search space but considering also methylation data
+
+### important!!!: second version of primary tumours' genomic dataset
+### (including methylation data should be loaded)
+data(CELLector.PrimTum.BEMs_v2)
+
+### Change the following two lines to work with a different cancer type
+tumours_BEM<-CELLector.PrimTum.BEMs_v2$COREAD
+
+### unicize the sample identifiers for the tumour data
+tumours_BEM<-CELLector.unicizeSamples(tumours_BEM)
+
+### loading decoding table for hypermethylation CFE identifiers
+data(CELLector.CFEs.HMSid_decode)
+
+### building a CELLector searching space
+CSS<-CELLector.Build_Search_Space(ctumours = t(tumours_BEM),
+                                  verbose = FALSE,
+                                  minGlobSupp = 0.05,
+                                  cancerType = 'COREAD',
+                                  pathway_CFEs = CELLector.Pathway_CFEs,
+                                  cnaIdMap = CELLector.CFEs.CNAid_mapping,
+                                  cnaIdDecode = CELLector.CFEs.CNAid_decode,
+                                  hmsIdDecode = CELLector.CFEs.HMSid_decode,
+                                  cdg = CELLector.HCCancerDrivers,
+                                  subCohortDefinition='TP53',
+                                  NegativeDefinition=TRUE,
+                                  includeHMS = TRUE)
 
 ### visualising the CELLector searching space as a binary tree
 CSS$TreeRoot
