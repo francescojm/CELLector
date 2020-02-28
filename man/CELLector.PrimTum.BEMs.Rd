@@ -1,9 +1,9 @@
 \name{CELLector.PrimTum.BEMs}
 \alias{CELLector.PrimTum.BEMs}
 \docType{data}
-\title{Primary Tumours' Binary Event Matrices}
+\title{Primary Tumours' Binary Genomic Event Matrices}
 \description{
-A list containing 16 data frames (one for cancer type), identified through TCGA labels. Each of these data frames contains primary tumours' \emph{binary event matrices} (BEMs) with the status (presence/absence) of \emph{cancer functional events} (CFEs) as defined in [1].
+A list containing 16 data frames (one for cancer type), identified through TCGA labels. Each of these data frames contains primary tumours' \emph{binary event matrices} (BEMs) with the status (presence/absence) of \emph{cancer functional events} (CFEs, somatic mutations in high-confidence cancer driver genes and copy number altered genomic segments) as defined in [1].
 }
 \usage{data("CELLector.PrimTum.BEMs")}
 \format{
@@ -34,6 +34,6 @@ CELLector.PrimTum.BEMs$COREAD[c('BRAF','KRAS','cna27'),1:10]
 Francesco Iorio (fi9232@gmail.com)
 }
 \seealso{
-\code{\link{CELLector.CellLine.BEMs}}, \code{\link{CELLector.CFEs}}, \code{\link{CELLector.CFEs.CNAid_decode}}
+\code{\link{CELLector.PrimTum.BEMs_v2}}, \code{\link{CELLector.CellLine.BEMs}}, \code{\link{CELLector.CFEs}}, \code{\link{CELLector.CFEs.CNAid_decode}}
 }
 \keyword{datasets}

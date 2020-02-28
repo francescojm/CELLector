@@ -1,6 +1,6 @@
 ---
 title: "CELLector: Genomics Guided Selection of Cancer in vitro models"
-author: "Hanna najgenbaur and Francesco Iorio"
+author: "Hanna Najgebauer and Francesco Iorio"
 date: "`r Sys.Date()`"
 output: rmarkdown::html_vignette
 vignette: >
@@ -25,7 +25,7 @@ CELLector can be used in three different modalities:
 
   - (i) as an R package (within R, code available at: https://github.com/francescojm/CELLector),
 
-  - (ii) as an online R shiny App (available at: http://ot-cellector.shiny.opentargets.io/CELLector_App/), 
+  - (ii) as an online R shiny App (available at: https://ot-cellector.shinyapps.io/CELLector_App/), 
 
   - (iii) running the R shiny App locally (within Rstudio, code available at:   https://github.com/francescojm/CELLector_App).
 

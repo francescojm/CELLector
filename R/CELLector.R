@@ -734,8 +734,6 @@ CELLector.CELLline_buildBEM <- function(varCat=NULL,
   return(BEM)
 }
 
-## documentation to be updated
-
 CELLector.Build_Search_Space<-function(ctumours,
                                        cancerType,
                                        minlen=1,
@@ -968,7 +966,6 @@ CELLector.Build_Search_Space<-function(ctumours,
 ### not documented data objects:
 
 ## CELLector.CellLine.BEMs_v2
-## CELLector.PrimTum.BEMs_v2
 ## CELLector.CFEsV2
 ## CELLector.CFEs.HMSid_decode
 ## CELLector.PrimTumVarCatalog
