@@ -28,10 +28,8 @@ CELLector.Tumours_buildBEM(varCat = NULL,
   A list of individual somatic variants to be extracted from the catalogue and assembled into the final matrix. The format should be the same of the \code{CELLector.RecfiltVariants} (which is used when this parameter is set to its default \code{NULL} value)
 }
 }
-\details{
-%%  ~~ If necessary, more details than the description above ~~
-}
 \value{
+A presence/absence (binary) matrix with gene symbols on the rows and patient sample ids on the columns, specifying in the \eqn{i,j-}entry the status of the \eqn{i}th gene in the \eqn{j}th patient sample, i.e. 0 = wild-type, 1 = mutated.
 }
 \references{
 [1] Iorio, F. et al. A Landscape of Pharmacogenomic Interactions in Cancer. Cell 166, 740–754 (2016).
@@ -41,16 +39,10 @@ CELLector.Tumours_buildBEM(varCat = NULL,
 [3] Tate JG, Bamford S, Jubb HC, et al. COSMIC: the Catalogue Of Somatic Mutations In Cancer. Nucleic Acids Res. 2019;47(D1):D941–D947. doi:10.1093/nar/gky1015
 }
 \author{
-%%  ~~who you are~~
+Francesco Iorio (fi9323@gmail.com)
 }
-\note{
-%%  ~~further notes~~
-}
-
-%% ~Make other sections like Warning with \section{Warning }{....} ~
-
 \seealso{
-\code{\link{CELLector.PrimTumVarCatalog}}
+\code{\link{CELLector.PrimTumVarCatalog}}, \code{\link{CELLector.CELLline_buildBEM}}
 }
 \examples{
 ## loading high-confidence cancer driver genes from [1]
