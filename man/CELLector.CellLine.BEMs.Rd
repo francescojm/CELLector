@@ -1,9 +1,9 @@
 \name{CELLector.CellLine.BEMs}
 \alias{CELLector.CellLine.BEMs}
 \docType{data}
-\title{Cell Lines' Binary Event Matrices}
+\title{Cell Lines' Binary Genomic Event Matrices}
 \description{
-A list containing 16 data frames (one for cancer type), identified through TCGA labels. Each of these data frames contains cell lines' \emph{binary event matrices} (BEMs) with the status (presence/absence) of \emph{cancer functional events} (CFEs) as defined in [1].
+A list containing 16 data frames (one for cancer type), identified through TCGA labels. Each of these data frames contains cell lines' \emph{binary event matrices} (BEMs) with the status (presence/absence) of \emph{cancer functional events} (CFEs, somatic mutations in high-confidence cancer driver genes and copy number altered genomic segments) as defined in [1].
 }
 \usage{data(CELLector.CellLine.BEMs)}
 \format{

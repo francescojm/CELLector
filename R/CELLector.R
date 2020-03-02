@@ -964,8 +964,6 @@ CELLector.Build_Search_Space<-function(ctumours,
 
 
 ### not documented data objects:
-
-## CELLector.CellLine.BEMs_v2
 ## CELLector.CFEsV2
 ## CELLector.CFEs.HMSid_decode
 ## CELLector.PrimTumVarCatalog
