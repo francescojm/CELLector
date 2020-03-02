@@ -1,7 +1,5 @@
 
 
-
-
 ## Exported Documented functions
 CELLector.mostSupported_CFEs<-function(transactions,minSupport=0.05,minlen=1,maxLen=10){
   res<-
@@ -964,7 +962,6 @@ CELLector.Build_Search_Space<-function(ctumours,
 
 
 ### not documented data objects:
-## CELLector.CFEsV2
 ## CELLector.CFEs.HMSid_decode
 ## CELLector.PrimTumVarCatalog
 
