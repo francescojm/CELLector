@@ -9,9 +9,12 @@ vignette: >
   %\VignetteEncoding{UTF-8}
 ---
 
+
 ```{r setup, include = FALSE}
 knitr::opts_chunk$set(collapse = TRUE, comment = "#>")
 ```
+
+## Introduction
 
 CELLector is a computational tool assisting experimental scientists in the selection of the most clinically relevant cancer cell lines to be included in a new in-vitro study (or to be considered in a retrospective study), in a patient-genomic guided fashion.
 
@@ -63,8 +66,8 @@ arules, dplyr, stringr, data.tree, sunburstR, igraph, collapsibleTree, methods
 ```
 
 all publicly available on CRAN or Bioconductor.
-The package comes with built-in data objects containing genomic data for large cohorts of primary tumours and cancer cell lines (from Iorio et al, Cell 2016).
-
+The package comes with built-in data objects containing genomic data for large cohorts of primary tumours and cancer cell lines (from Iorio et al, Cell 2016). Optionally, users can build
+their own genomic binary event matrices (BEMs) from their data or regenerating the built-in data objects using data from Iorio et al, Cell 2016 but using customised filters for cancer driver genes and variants. Last, cell line BEMs can be reassembled using annotations and data from the [Cell Model Passports](https://cellmodelpassports.sanger.ac.uk/), through dedicated interface functions.
 
 
 ### Selecting Colorectal Cancer Cell Lines that are representative of a defined patients' sub-group
@@ -164,6 +167,32 @@ selectedCellLines<-CELLector.makeSelection(modelMat = ModelMat,
 
 knitr::kable(selectedCellLines,align = 'l')
 ```
+
+### Scoring the clinical relevance of cancer cell lines
+With CELLector is possiblee to quantify the quality of each cell line in terms of its ability to represent an entire cohort of considered disease matching patients. This is quantified as a trade-off between two factors. The first factor is the length of the CELLector signatures (in terms of number of composing individual alterations) that are present in the cell line under consideration. This is proportional to the granularity of the representative ability of the cell line, i.e. the longest the signature the more precisely defined is the represented sub-cohort of patients. The second factor is the size of the patient subpopulation represented by the signatures that can be observed in the cell line under consideration, thus accounting for the prevalence of the sub-cohort modeled by that cell line. An input parameter allows for these two factors to be weighted equally or differently.
+
+In this example, we want to score the quality of the cell lines in the colorectal cancer panel, based on the searching space assembled in the previous examples.
+
+```{r, fig.show='hold',fig.width=6,fig.height=6}
+### Scoring colorectal cancer cell lines based on the searching space assembled in the previous examples
+CSscores<-CELLector.Score(NavTab = CSS$navTable,CELLlineData = CELLlineData)
+
+### Visualising the best 3 cell lines according to the considered searching space and criteria
+knitr::kable(CSscores[1:3,],align = 'l')
+```
+
+In this other example, we want to recompute the cell line scores but prioritising the size of the sub-cohort represented by each cell line over how much it is precisely defined.
+
+```{r, fig.show='hold',fig.width=6,fig.height=6}
+### Scoring colorectal cancer cell lines based on the searching space assembled in the previous examples
+CSscores<-CELLector.Score(NavTab = CSS$navTable,CELLlineData = CELLlineData,alfa = 0.10)
+
+### Visualising the best 3 cell lines according to the considered searching space and criteria
+knitr::kable(CSscores[1:3,],align = 'l')
+```
+
+### Assembling Genomic Binary Event Matrices (BEMs) and selecting cell line using customised genomic data
+
 
 
 
