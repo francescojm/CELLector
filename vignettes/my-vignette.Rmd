@@ -9,11 +9,23 @@ vignette: >
   %\VignetteEncoding{UTF-8}
 ---
 
+
 ```{r setup, include = FALSE}
 knitr::opts_chunk$set(collapse = TRUE, comment = "#>")
 ```
 
-CELLector is a computational tool aiming to assist the selection of the most relevant cancer cell lines to be included in a new in-vitro study (or to be considered in a retrospective study), in a patient-genomic fashion. CELLector combines methods from graph theory and market basket analysis; it leverages tumour genomics data to explore, rank, and select optimal cell line models in a user-friendly way, enabling scientists to make appropriate and informed choices about model inclusion/exclusion in retrospective analyses and future studies. Additionally, it allows the selection of models within user-defined contexts, for example, by focusing on genomic alterations occurring in biological pathways of interest or considering only predetermined sub-cohorts of cancer patients. Finally, CELLector identifies combinations of molecular alterations underlying disease subtypes currently lacking representative cell lines, providing guidance for the future development of new cancer models.
+=======
+## Introduction
+
+CELLector is a computational tool assisting experimental scientists in the selection of the most clinically relevant cancer cell lines to be included in a new in-vitro study (or to be considered in a retrospective study), in a patient-genomic guided fashion.
+
+CELLector combines methods from graph theory and market basket analysis; it leverages tumour genomics data to explore, rank, and select optimal cell line models in a user-friendly way, through the [CELLector Rshiny App](https://github.com/francescojm/CELLector_app). This enables making appropriate and informed choices about model inclusion/exclusion in retrospective analyses, future studies and it makes possible bridging cancer patient genomics with public available databases froom cell line based functional/pharmacogenomic screens, such as [CRISPR-cas9 dependency datasets](https://score.depmap.sanger.ac.uk/) and [large-scale in-vitro drug screens](https://www.cancerrxgene.org/).
+
+Furthermore, CELLector includes interface functions to synchronise built-in cell line annotations and genomics data to their latest versions from the [Cell Model Passports](https://cellmodelpassports.sanger.ac.uk/) resource. Through this interface, bioinformaticians can quickly generate binary genomic event matrices (BEMs) accounting for hundreds of cancer cell lines, which can be used in systematic statistical inferences, associating patient-defined cell line subgroups with drug-response/gene-essentiality, for example through [GDSC tools](https://gdsctools.readthedocs.io/en/master/).
+
+Additionally, CELLector allows the selection of models within user-defined contexts, for example, by focusing on genomic alterations occurring in biological pathways of interest or considering only predetermined sub-cohorts of cancer patients. 
+
+Finally, CELLector identifies combinations of molecular alterations underlying disease subtypes currently lacking representative cell lines, providing guidance for the future development of new cancer models.
 
 License: MIT
 
@@ -55,8 +67,8 @@ arules, dplyr, stringr, data.tree, sunburstR, igraph, collapsibleTree, methods
 ```
 
 all publicly available on CRAN or Bioconductor.
-The package comes with built-in data objects containing genomic data for large cohorts of primary tumours and cancer cell lines (from Iorio et al, Cell 2016).
-
+The package comes with built-in data objects containing genomic data for large cohorts of primary tumours and cancer cell lines (from Iorio et al, Cell 2016). Optionally, users can build
+their own genomic binary event matrices (BEMs) from their data or regenerating the built-in data objects using data from Iorio et al, Cell 2016 but using customised filters for cancer driver genes and variants. Last, cell line BEMs can be reassembled using annotations and data from the [Cell Model Passports](https://cellmodelpassports.sanger.ac.uk/), through dedicated interface functions.
 
 
 ### Selecting Colorectal Cancer Cell Lines that are representative of a defined patients' sub-group
@@ -156,6 +168,32 @@ selectedCellLines<-CELLector.makeSelection(modelMat = ModelMat,
 
 knitr::kable(selectedCellLines,align = 'l')
 ```
+
+### Scoring the clinical relevance of cancer cell lines
+With CELLector is possiblee to quantify the quality of each cell line in terms of its ability to represent an entire cohort of considered disease matching patients. This is quantified as a trade-off between two factors. The first factor is the length of the CELLector signatures (in terms of number of composing individual alterations) that are present in the cell line under consideration. This is proportional to the granularity of the representative ability of the cell line, i.e. the longest the signature the more precisely defined is the represented sub-cohort of patients. The second factor is the size of the patient subpopulation represented by the signatures that can be observed in the cell line under consideration, thus accounting for the prevalence of the sub-cohort modeled by that cell line. An input parameter allows for these two factors to be weighted equally or differently.
+
+In this example, we want to score the quality of the cell lines in the colorectal cancer panel, based on the searching space assembled in the previous examples.
+
+```{r, fig.show='hold',fig.width=6,fig.height=6}
+### Scoring colorectal cancer cell lines based on the searching space assembled in the previous examples
+CSscores<-CELLector.Score(NavTab = CSS$navTable,CELLlineData = CELLlineData)
+
+### Visualising the best 3 cell lines according to the considered searching space and criteria
+knitr::kable(CSscores[1:3,],align = 'l')
+```
+
+In this other example, we want to recompute the cell line scores but prioritising the size of the sub-cohort represented by each cell line over how much it is precisely defined.
+
+```{r, fig.show='hold',fig.width=6,fig.height=6}
+### Scoring colorectal cancer cell lines based on the searching space assembled in the previous examples
+CSscores<-CELLector.Score(NavTab = CSS$navTable,CELLlineData = CELLlineData,alfa = 0.10)
+
+### Visualising the best 3 cell lines according to the considered searching space and criteria
+knitr::kable(CSscores[1:3,],align = 'l')
+```
+
+### Assembling Genomic Binary Event Matrices (BEMs) and selecting cell line using customised genomic data
+... in progress
 
 
 
