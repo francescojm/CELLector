@@ -3,7 +3,7 @@
 
 ![alt text](https://github.com/najha/CELLector_App/blob/master/www/cellcultures.jpg)
 
-Najgebauer, H., Yang, M., Francies, H., Pacini, C., Stronach, E. A., Garnett, M. J., Saez-Rodriguez, J., & Iorio, F. (n.d.). CELLector: Genomics Guided Selection of Cancer in vitro Models. http://doi.org/10.1101/275032
+Najgebauer, H., Yang, M., Francies, H., Pacini, C., Stronach, E. A., Garnett, M. J., Saez-Rodriguez, J., & Iorio, F. CELLector: Genomics Guided Selection of Cancer in vitro Models. http://doi.org/10.1101/275032
 
 2018-04-14
 CELLector is a computational tool assisting experimental scientist in the selection of the most clinically relevant cancer cell lines to be included in a new in-vitro study (or to be considered in a retrospective study), in a patient-genomic guided fashion.
