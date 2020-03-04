@@ -19,7 +19,7 @@ CELLector.Tumours_buildBEM(varCat = NULL,
 
 }
   \item{Cancer_Type}{
-  A string specifying the cancer type for which individual variants should be extracted from the catalogue and assembled into the final matrix. It must be a value included in the \code{Cancer.Type} column of the \item{varCat} data object
+  A string specifying the cancer type for which individual variants should be extracted from the catalogue and assembled into the final matrix. It must be a value included in the \code{Cancer.Type} column of the \code{varCat} data object
 }
   \item{GenesToConsider}{
   A list of strings with HGNC symbols [2] for genes hosting the variants to be extracted from the catalogue and assembled into the final matrix. When set to its default \code{NULL} value, all genes hosting at least one variants are considered.

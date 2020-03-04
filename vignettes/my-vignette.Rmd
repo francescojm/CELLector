@@ -169,7 +169,7 @@ knitr::kable(selectedCellLines,align = 'l')
 ```
 
 ### Scoring the clinical relevance of cancer cell lines
-With CELLector is possiblee to quantify the quality of each cell line in terms of its ability to represent an entire cohort of considered disease matching patients. This is quantified as a trade-off between two factors. The first factor is the length of the CELLector signatures (in terms of number of composing individual alterations) that are present in the cell line under consideration. This is proportional to the granularity of the representative ability of the cell line, i.e. the longest the signature the more precisely defined is the represented sub-cohort of patients. The second factor is the size of the patient subpopulation represented by the signatures that can be observed in the cell line under consideration, thus accounting for the prevalence of the sub-cohort modeled by that cell line. An input parameter allows for these two factors to be weighted equally or differently.
+With CELLector is possible to quantify the quality of each cell line in terms of its ability to represent an entire cohort of considered disease matching patients. This is quantified as a trade-off between two factors. The first factor is the length of the CELLector signatures (in terms of number of composing individual alterations) that are present in the cell line under consideration. This is proportional to the granularity of the representative ability of the cell line, i.e. the longest the signature the more precisely defined is the represented sub-cohort of patients. The second factor is the size of the patient subpopulation represented by the signatures that can be observed in the cell line under consideration, thus accounting for the prevalence of the sub-cohort modeled by that cell line. An input parameter allows for these two factors to be weighted equally or differently.
 
 In this example, we want to score the quality of the cell lines in the colorectal cancer panel, based on the searching space assembled in the previous examples.
 
@@ -192,7 +192,83 @@ knitr::kable(CSscores[1:3,],align = 'l')
 ```
 
 ### Assembling Genomic Binary Event Matrices (BEMs) and selecting cell line using customised genomic data
-... in progress
+In the following example, we show how it is possible to run CELLector analyses and cell line selections from user defined genomic data. To this aim we will first generate genomic binary event matrices (BEMs) for Colorectal Cancer patients and cell lines using somatic variant catalogues derived from the TCGA (as presented in [Iorio et al, Cell 2016](https://www.cancerrxgene.org/gdsc1000/GDSC1000_WebResources/Home.html)) and from the latest installment of the [Cell Model Passports](https://cellmodelpassports.sanger.ac.uk/), respectively for patients and cell lines, pre-selecting sets of cancer driver genes and variants to be considered in these catalogues. Fully user defined genomic variants catalogues can also be used. In this example we will particularly focus on **human derived microsatellite stable diploid colorectal carcinoma cell lines resected from male patients**.
+
+First we build the BEMs as explained, with the following commands
+
+```{r, fig.show='hold',fig.width=6,fig.height=6}
+## loading a set of high-confidence cancer driver genes from Iorio et al, Cell 2016
+data(CELLector.HCCancerDrivers)
+
+## loading a set of variants observed it at least two patients in COSMIC
+data(CELLector.RecfiltVariants)
+
+## Assembling a genomic binary event matrix (BEM) for human derived microsatellite stable diploid colorectal carcinoma cell lines,
+## resected from male patients using genomic data from the Cell Model Passports, considering only variants observed in COSMIC in at lest two patients
+## in high-confidence cancer driver genes
+COREAD_cl_BEM <- CELLector.CELLline_buildBEM(
+                  Tissue='Large Intestine',
+                  Cancer_Type = 'Colorectal Carcinoma',
+                  msi_status_select = 'MSI',
+                  ploidy_th = c(2,2),
+                  GenesToConsider = CELLector.HCCancerDrivers,
+                  VariantsToConsider = CELLector.RecfiltVariants)
+
+## showing first entries of the BEM
+head(COREAD_cl_BEM)
+
+## bar diagram with mutation frequencies in the BEM for 20 top frequently mutated genes
+barplot(sort(colSums(COREAD_cl_BEM[,3:ncol(COREAD_cl_BEM)]),decreasing=TRUE)[1:20],
+        las=2,ylab='n. mutated cell lines')
+```
+
+```{r, fig.show='hold',fig.width=6,fig.height=6}
+## Assembling BEM for Colorectal Adenocarcinoma (COAD/READ) primary tumours using data from the TCGA as presented in Iorio et al 2016,
+## considering only variants observed in COSMIC in at lest two patients in high-confidence cancer driver genes
+COREAD_tum_BEM<-
+  CELLector.Tumours_buildBEM(Cancer_Type = 'COAD/READ',GenesToConsider = CELLector.HCCancerDrivers,
+                             VariantsToConsider = CELLector.RecfiltVariants)
+
+## showing first 25 entries of the BEM
+COREAD_tum_BEM[1:5,1:5]
+
+## showing a bar diagram with mutation frequency of 30 top frequently altered genes
+barplot(100*sort(rowSums(COREAD_tum_BEM),
+                 decreasing=TRUE)[1:30]/ncol(COREAD_tum_BEM),
+                 las=2,ylab='% patients')
+
+```
+
+Next, we assemble a CELLector searching space and select representative cell lines as for the previous examples.
+
+```{r, fig.show='hold',fig.width=6,fig.height=6}
+### Assembling the searching space and visualising it as interactive sunburst
+
+COREAD_tum_BEM<-CELLector.unicizeSamples(COREAD_tum_BEM)
+CSS<-CELLector.Build_Search_Space(ctumours = t(COREAD_tum_BEM),
+                                  verbose = FALSE,
+                                  minGlobSupp = 0.02,
+                                  cancerType = 'COREAD')
+
+CELLector.visualiseSearchingSpace_sunBurst(CSS)
+```
+
+```{r, fig.show='hold',fig.width=6,fig.height=6}
+### take all the signatures from the searching space
+Signatures <- CELLector.createAllSignatures(CSS$navTable)
+
+### mapping the cell lines on the CELLector searching space
+ModelMat<-CELLector.buildModelMatrix(Signatures$ES,COREAD_cl_BEM,CSS$navTable)
+
+
+### selecting 5 representative cell lines
+selectedCellLines<-CELLector.makeSelection(modelMat = ModelMat,
+                                           n=5,
+                                           searchSpace = CSS$navTable)
+
+knitr::kable(selectedCellLines,align = 'l')
+```
+
 
 
 
