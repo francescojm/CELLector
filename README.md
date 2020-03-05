@@ -31,8 +31,6 @@ CELLector can be used in three different modalities:
 
 [Shiny App tutorial and use cases](https://rpubs.com/francescojm/CELLector)
 
-  ** This has been temporarily deployed on a public Rshiny Server, which comes with a monthly time usage limitation. Deployment on a corporative server is in progress. If time limit has been reached, thus the online version of the App is down, please refer to the (iii) modality. 
-
 ![alt text](www/preview1.png)
 
 ## R package: quick start (interactive vignette)
