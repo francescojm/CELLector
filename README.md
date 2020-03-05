@@ -1,5 +1,5 @@
 # CELLector: Genomics Guided Selection of Cancer in vitro models
-
+v1.2.0
 
 ![alt text](https://github.com/najha/CELLector_App/blob/master/www/cellcultures.jpg)
 
