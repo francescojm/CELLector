@@ -12,7 +12,7 @@ Identifiers of cancer functional events (CFEs, i.e. somatic mutations in high co
 A vector of strings with one entry per identifier.
 }
 \details{
-Gene symbols indicate somatic mutations in high confidence cancer driver genes, entries with \emph{cna} prefix indicate chromosomal segments that are recurrently copy number altered in cancer (RACSs), entries with \emph(hms) prefix indicate hypermehylated gene promoters, all defined in [1].
+Gene symbols indicate somatic mutations in high confidence cancer driver genes, entries with \emph{cna} prefix indicate chromosomal segments that are recurrently copy number altered in cancer (RACSs), entries with \emph{hms} prefix indicate hypermehylated gene promoters, all defined in [1].
 
 A decoding table for the HMS is available in the \code{\link{CELLector.CFEs.HMSid_decode}} object, with the mapping realised by the values in the \code{hms_id} column.
 
