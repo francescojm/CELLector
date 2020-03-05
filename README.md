@@ -29,8 +29,6 @@ CELLector can be used in three different modalities:
   
   - (iii) as a local R shiny App (within Rstudio, code available at: https://github.com/francescojm/CELLector_App).
 
-[Shiny App tutorial and use cases](https://rpubs.com/francescojm/CELLector)
-
 ![alt text](www/preview1.png)
 
 ## R package: quick start (interactive vignette)
