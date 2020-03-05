@@ -35,6 +35,10 @@ CELLector can be used in three different modalities:
 
 http://rpubs.com/francescojm/CELLector
 
+## R package: Reference manual
+
+https://github.com/francescojm/CELLector/blob/master/CELLector.pdf
+
 ![alt text](www/preview2.png)
 
 
