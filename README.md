@@ -4,8 +4,6 @@
 # CELLector: Genomics Guided Selection of Cancer in vitro models
 v1.2.0
 
-![alt text](https://github.com/najha/CELLector_App/blob/master/www/cellcultures.jpg)
-
 Najgebauer, H., Yang, M., Francies, H., Pacini, C., Stronach, E. A., Garnett, M. J., Saez-Rodriguez, J., & Iorio, F. CELLector: Genomics Guided Selection of Cancer in vitro Models. http://doi.org/10.1101/275032
 
 2020-03-03
@@ -21,6 +19,8 @@ Additionally, CELLector allows the selection of models within user-defined conte
 Finally, CELLector identifies combinations of molecular alterations underlying disease subtypes currently lacking representative cell lines, providing guidance for the future development of new cancer models.
 
 License: MIT
+
+![alt text](https://github.com/najha/CELLector_App/blob/master/www/cellcultures.jpg)
 
 ## Running Modalities
 
