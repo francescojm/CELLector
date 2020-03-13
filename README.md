@@ -1,3 +1,6 @@
+
+![alt text](https://github.com/francescojm/CELLector_App/blob/master/www/Cellector-logo-double-size.png)
+
 # CELLector: Genomics Guided Selection of Cancer in vitro models
 v1.2.0
 
