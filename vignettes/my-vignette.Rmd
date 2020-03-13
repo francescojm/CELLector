@@ -1,3 +1,4 @@
+
 ---
 title: "CELLector: Genomics Guided Selection of Cancer in vitro models"
 author: "Hanna Najgebauer and Francesco Iorio"
@@ -9,10 +10,11 @@ vignette: >
   %\VignetteEncoding{UTF-8}
 ---
 
-
 ```{r setup, include = FALSE}
 knitr::opts_chunk$set(collapse = TRUE, comment = "#>")
 ```
+
+![](../www/Cellector-logo-double-size.png)
 
 ## Introduction
 
