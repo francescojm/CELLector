@@ -284,7 +284,11 @@ CELLector.makeSelection<-function(modelMat,n,searchSpace){
       }
 
       selectedCLS[flag]<-selection
-      modelAccounted[flag]<-modelMatIdx
+
+      ## In a previous version, this line contained the following Bug: modelAccounted[flag]<-modelMatIdx
+      ## causing inconsistencies in the signature definition of the selected cell lines table
+      modelAccounted[flag]<-as.numeric(rownames(ModelMat)[modelMatIdx])
+
       flag<-flag+1
 
       TOinclude<-setdiff(TOinclude,selectedCLS)
