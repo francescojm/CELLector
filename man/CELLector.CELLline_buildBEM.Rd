@@ -101,7 +101,7 @@ A vector of two real numbers specifying an age at sampling interval the cell lin
    }
 }
 \value{
-A data frame with one row per cell lines, Cell model passport identifiers and cell line names in the first two columns followed by a presence/absence (binary) matrix with gene symbols on the columns, specifying in the \eqn{i,j-}entry the status of the \eqn{j}th gene in the \eqn{i}th cell line, i.e. 0 = wild-type, 1 = mutated.
+A data frame with one row per cell lines, Cell model passport identifiers, cell line names and COSMIC identifiers[4] in the first three columns followed by a presence/absence (binary) matrix with gene symbols on the columns, specifying in the \eqn{i,j-}entry the status of the \eqn{j}th gene in the \eqn{i}th cell line, i.e. 0 = wild-type, 1 = mutated.
 }
 \references{
 [1] van der Meer D, Barthorpe S, Yang W, et al. Cell Model Passports-a hub for clinical, genetic and functional datasets of preclinical cancer models. Nucleic Acids Res. 2019;47(D1):D923–D929. doi:10.1093/nar/gky872
@@ -109,6 +109,8 @@ A data frame with one row per cell lines, Cell model passport identifiers and ce
 [2] Braschi, B. et al. Genenames.org: the HGNC and VGNC resources in 2019. Nucleic Acids Res. Epub 2018 Oct 10. PMID: 30304474 DOI: 10.1093/nar/gky930
 
 [3] Iorio, F. et al. A Landscape of Pharmacogenomic Interactions in Cancer. Cell 166, 740–754 (2016).
+
+[4] Tate JG, Bamford S, Jubb HC, et al. COSMIC: the Catalogue Of Somatic Mutations In Cancer. Nucleic Acids Res. 2019;47(D1):D941–D947. doi:10.1093/nar/gky1015
 }
 \author{
 Francesco Iorio (fi9323@gmail.com)

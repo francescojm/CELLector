@@ -730,12 +730,13 @@ CELLector.CELLline_buildBEM <- function(varCat=NULL,
 
   cls<-clAnnotation$model_name[match(allModel_ids,clAnnotation$model_id)]
 
-  COSMIC_ids<-clAnnotation$COSMIC_ID[match(allModel_ids,clAnnotation$model_id)]
+
+  COSMIC_IDs<-clAnnotation$COSMIC_ID[match(allModel_ids,clAnnotation$model_id)]
 
   BEM<-data.frame(CMP_identifier=allModel_ids,
-                  COSMIC_ids=COSMIC_ids,
+                  COSMIC_IDs=COSMIC_IDs,
                   CellLine=cls,
-                  t(BEM))
+                  t(BEM),stringsAsFactors = FALSE)
 
   return(BEM)
 }
