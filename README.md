@@ -18,7 +18,7 @@ Additionally, CELLector allows the selection of models within user-defined conte
 
 Finally, CELLector identifies combinations of molecular alterations underlying disease subtypes currently lacking representative cell lines, providing guidance for the future development of new cancer models.
 
-License: MIT
+License: GNU GPLv3
 
 ![alt text](https://github.com/najha/CELLector_App/blob/master/www/cellcultures.jpg)
 
