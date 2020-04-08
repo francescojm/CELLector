@@ -2,8 +2,12 @@
 ---
 title: "CELLector: Genomics Guided Selection of Cancer in vitro models"
 author: "Hanna Najgebauer and Francesco Iorio"
+subtitle: 'R package interactive vignette'
 date: "`r Sys.Date()`"
-output: rmarkdown::html_vignette
+output:
+    rmarkdown::html_vignette:
+      toc: true
+      toc_depth: 3
 vignette: >
   %\VignetteIndexEntry{Vignette Title}
   %\VignetteEngine{knitr::rmarkdown}
