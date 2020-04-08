@@ -45,13 +45,7 @@ CELLector can be used in three different modalities:
 This page contains instruction to quickly try the package. User manual and package documentation are available at
 https://github.com/francescojm/CELLector/blob/master/CELLector.pdf.
 
-**to be completed** **to be completed** **to be completed**
-
-A tutorial on how to use the online Rshiny app (containing also # # instruction on how to run it locally) is available here: 
-https://www.biorxiv.org/highwire/filestream/92891/field_highwire_adjunct_files/0/275032-1.pdf
-
-**to be completed** **to be completed** **to be completed**
-
+A tutorial on how to use the **online Rshiny app** (containing also instructions on how to run it locally) is available [here](https://rpubs.com/francescojm/CELLector_App)
 
 ## R package: quick start
 
