@@ -18,6 +18,8 @@ vignette: >
 knitr::opts_chunk$set(collapse = TRUE, comment = "#>")
 ```
 
+ <br>
+
 ![](../www/Cellector-logo-double-size.png)
 
 ## Introduction
