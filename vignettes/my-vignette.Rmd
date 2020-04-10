@@ -22,6 +22,14 @@ knitr::opts_chunk$set(collapse = TRUE, comment = "#>")
 
 ![](../www/Cellector-logo-double-size.png)
 
+<br> <br> <br><br>
+[CELLector R package interactive vignette](https://rpubs.com/francescojm/CELLector)
+
+[CELLector manuscript example study case](https://rpubs.com/francescojm/CELLector_mans_ex)
+
+[CELLector App online tutorial](https://rpubs.com/francescojm/CELLector_App)
+<br> <br> <br><br>
+
 ## Introduction
 
 CELLector is a computational tool assisting experimental scientists in the selection of the most clinically relevant cancer cell lines to be included in a new in-vitro study (or to be considered in a retrospective study), in a patient-genomic guided fashion.
