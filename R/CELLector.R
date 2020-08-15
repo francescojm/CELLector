@@ -967,6 +967,39 @@ CELLector.Build_Search_Space<-function(ctumours,
   return(list(navTable=NT,TreeRoot=nROOT))
 }
 
+## Exported non Documented functions
+CELLector.CMPs_quickCurrent_PANCANCER_BEM <-
+  function(URL='https://cog.sanger.ac.uk/cmp/download/mutations_20191101.zip'){
+
+
+  if(url.exists(URL)){
+
+    temp <- tempfile()
+    download.file(URL,temp)
+    X <- read.csv(unz(temp,'mutations_20191101.csv'),stringsAsFactors = FALSE)
+
+    id<-which(X$cancer_driver=='True')
+    X<-X[id,]
+
+    models<-unique(X$model_name)
+    genes<-unique(X$gene_symbol)
+
+    BEM<-matrix(0,length(genes),length(models),dimnames = list(genes,models))
+
+    nn<-nrow(X)
+
+    for (i in 1:nn){
+      BEM[X$gene_symbol[i],X$model_name[i]]<-1
+    }
+
+  }else{
+    BEM <- NULL
+  }
+  return(BEM)
+}
+
+
+
 
 ### not documented data objects:
 ## CELLector.RecfiltVariants

@@ -36,6 +36,7 @@ export(CELLector.Score)
 export(CELLector.CMPs_getModelAnnotation)
 export(CELLector.CMPs_getDriverGenes)
 export(CELLector.CMPs_getVariants)
+export(CELLector.CMPs_quickCurrent_PANCANCER_BEM)
 #export(CELLector.CELLline_buildBEM)
 
 
