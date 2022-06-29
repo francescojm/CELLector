@@ -101,3 +101,48 @@ CELLector.from_Hierarchical_to_Partition <- function(navTable,
 
   return(navTable_partition)
 }
+
+
+# compute both hierarchical and partition frameworks
+CELLector.Build_Search_Space_Partitioned <- function(ctumours, cancerType,
+                                                   minlen = 1, verbose = TRUE,
+                                                   mutOnly = FALSE,
+                                                   cnaOnly = FALSE,
+                                                   includeHMS = FALSE,
+                                                   minGlobSupp = 0.01,
+                                                   FeatureToExclude = NULL,
+                                                   pathway_CFEs = NULL, pathwayFocused = NULL,
+                                                   subCohortDefinition = NULL,
+                                                   NegativeDefinition = FALSE, cnaIdMap = NULL,
+                                                   cnaIdDecode = NULL, hmsIdDecode = NULL,
+                                                   cdg = NULL, UD_genomics = FALSE){
+
+  # compute hierarchical output of CSS
+  CSS_output <- CELLector.Build_Search_Space(ctumours, cancerType,
+                                             minlen = minlen, verbose = verbose,
+                                             mutOnly = mutOnly,
+                                             cnaOnly = cnaOnly,
+                                             includeHMS = includeHMS,
+                                             minGlobSupp = minGlobSupp,
+                                             FeatureToExclude = FeatureToExclude,
+                                             pathway_CFEs = pathway_CFEs, pathwayFocused = pathwayFocused,
+                                             subCohortDefinition = subCohortDefinition,
+                                             NegativeDefinition = NegativeDefinition, cnaIdMap = cnaIdMap,
+                                             cnaIdDecode = cnaIdDecode, hmsIdDecode = hmsIdDecode,
+                                             cdg = cdg, UD_genomics = UD_genomics)
+
+
+  # convert to partitioned
+  if (verbose) {
+    print("######## converting herarchical to partioned #########")
+  }
+
+  navTable_partition <- CELLector.from_Hierarchical_to_Partition(navTable = CSS_output$navTable,
+                                                                 samples_id = rownames(ctumours),
+                                                                 verbose = verbose)
+  # some new category could have no samples, remove
+  navTable_partition <- navTable_partition %>% filter(Total > 0)
+
+  return(list(partitioned = navTable_partition, heriarchical = CSS_output))
+
+}
