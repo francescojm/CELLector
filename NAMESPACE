@@ -27,9 +27,12 @@ export(CELLector.selectionVisit)
 export(CELLector.changeSScolors)
 export(CELLector.visualiseSearchingSpace)
 export(CELLector.visualiseSearchingSpace_sunBurst)
-export(CELLector.from_Hierarchical_to_Partition)
 
 exportPattern("^[[:alpha:]]+")
+
+# for partitioned version
+export(CELLector.from_Hierarchical_to_Partition)
+export(CELLector.Build_Search_Space_Partitioned)
 
 ## not documented
 export(CELLector.Score)
