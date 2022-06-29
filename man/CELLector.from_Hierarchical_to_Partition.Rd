@@ -24,10 +24,10 @@ CELLector.from_Hierarchical_to_Partition(navTable,
 }
 }
 \details{
-This is an auxiliary function used in \code{\link{CELLector.Build_Search_Space_Partioned}} (for details check documentation).
+This is an auxiliary function used in \code{\link{CELLector.Build_Search_Space_Partitioned}} (for details check documentation).
 }
 \value{
-\emph{Navigable table}: a data frame with a row for each patient group and columns as described in \code{\link{CELLector.Build_Search_Space_Partioned}}
+\emph{Navigable table}: a data frame with a row for each patient group and columns as described in \code{\link{CELLector.Build_Search_Space_Partitioned}}
 }
 \references{
 [1] Najgebauer, H. et al. Genomics Guided Selection of Cancer in vitro Models.
@@ -40,10 +40,10 @@ Lucia Trastulla and Francesco Iorio
 
 \seealso{
 \code{\link{CELLector.Build_Search_Space}}
-\code{\link{CELLector.Build_Search_Space_Partioned}}
+\code{\link{CELLector.Build_Search_Space_Partitioned}}
 }
 \examples{
-# see example for CELLector.Build_Search_Space_Partioned
+# see example for CELLector.Build_Search_Space_Partitioned
 }
 
 % Add one or more standard keywords, see file 'KEYWORDS' in the
