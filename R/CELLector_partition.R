@@ -155,3 +155,23 @@ CELLector.Build_Search_Space_Partitioned <- function(ctumours, cancerType,
   return(list(partitioned = navTable_partition, hierarchical = CSS_output))
 
 }
+
+# create signature for partition
+CELLector.createAllSignatures_Partitioned <- function(NavTab){
+
+  NN <- NavTab$Idx
+  signatures <- vector()
+  encodedsignatures <- vector()
+  subTypeSizes <- vector()
+  for (i in 1:length(NN)){
+    signatures[i] <- NavTab$SignatureDecoded[i]
+    encodedsignatures[i] <- NavTab$Signature[i]
+    subTypeSizes[i] <- NavTab$Support[i]
+  }
+  names(signatures) <- NN
+  names(encodedsignatures) <- NN
+  return(list(S = signatures, ES = encodedsignatures, STS = 100 *
+                subTypeSizes))
+
+}
+

@@ -33,6 +33,7 @@ exportPattern("^[[:alpha:]]+")
 # for partitioned version
 export(CELLector.from_Hierarchical_to_Partition)
 export(CELLector.Build_Search_Space_Partitioned)
+export(CELLector.createAllSignatures_Partitioned)
 
 ## not documented
 export(CELLector.Score)
