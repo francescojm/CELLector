@@ -102,7 +102,6 @@ CELLector.from_Hierarchical_to_Partition <- function(navTable,
   return(navTable_partition)
 }
 
-
 # compute both hierarchical and partition frameworks
 CELLector.Build_Search_Space_Partitioned <- function(ctumours, cancerType,
                                                    minlen = 1, verbose = TRUE,
@@ -137,12 +136,22 @@ CELLector.Build_Search_Space_Partitioned <- function(ctumours, cancerType,
     print("######## converting herarchical to partioned #########")
   }
 
+  if(length(subCohortDefinition)>0){
+    if(is.element(subCohortDefinition,colnames(ctumours))){
+      if(NegativeDefinition){
+        ctumours<-ctumours[which(ctumours[,subCohortDefinition]==0),]
+      }else{
+        ctumours<-ctumours[which(ctumours[,subCohortDefinition]==1),]
+      }
+    }
+  }
+
   navTable_partition <- CELLector.from_Hierarchical_to_Partition(navTable = CSS_output$navTable,
                                                                  samples_id = rownames(ctumours),
                                                                  verbose = verbose)
   # some new category could have no samples, remove
   navTable_partition <- navTable_partition %>% filter(Total > 0)
 
-  return(list(partitioned = navTable_partition, heriarchical = CSS_output))
+  return(list(partitioned = navTable_partition, hierarchical = CSS_output))
 
 }
