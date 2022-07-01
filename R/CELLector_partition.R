@@ -232,7 +232,7 @@ CELLector.Summary_Projection <- function(Signatures, ModelMat){
                    Signatures_complete = Signatures$S,
                    N_patients =  Signatures$SC,
                    P_patients = Signatures$STS,
-                   n_CL = NA, repr_CL = NA)
+                   N_CL = NA, repr_CL = NA)
 
   id_mapped <- rownames(ModelMat)
   id_lines <- colnames(ModelMat)
@@ -248,6 +248,16 @@ CELLector.Summary_Projection <- function(Signatures, ModelMat){
       df$repr_CL[id_row] <- paste0(id_lines[ModelMat[id_row_model, ] == 1], collapse = ',')
     }
   }
+
+  # assign score to each group as the product of percentage of patients in that sub-population
+  # times the positive signature length. The positive Signatures allow to move to deeper levels (outer circles)
+  # in the sunburst representation
+  tmp <- str_split(df$Signatures, pattern = '[,]')
+  tmp  <- lapply(tmp, str_trim)
+  Sign_positive_len <- sapply(tmp, function(x) length(x) - sum(grepl('~', x)))
+
+  df$subpop_score <- df$P_patients * Sign_positive_len
+
   return(df)
 }
 
