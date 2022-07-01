@@ -17,7 +17,7 @@ CELLector.createAllSignatures_Partitioned(NavTab)
 }
 }
 \value{
-A list with two vectors of strings and a numerical vector. Each element of the first two vectors represent a signature of cancer functional events (CFEs, defined in [1]) corresponding to a group in the CELLector searching space partitioned. This is expressed as a logic formula (rule), which a cancer patient's genome must satisfy in order to be included in the group under consideration. The first vector (\code{S}) contains decoded signatures, i.e. where the CFEs involving copy number alterations are represented by a genomic loci and contained cancer driver genes. The second vector (\code{ES}) contains signatures of CFEs as they are represented in the binary event matrix containing the patients genomic data used to build the CELLector searching space. Further deatils are provided in [2]. The third vector (\code{STS}) contains the percentage of cancer patients belonging to the group represented by the signatures.
+A list with two vectors of strings and two numerical vector. Each element of the first two vectors represent a signature of cancer functional events (CFEs, defined in [1]) corresponding to a group in the CELLector searching space partitioned. This is expressed as a logic formula (rule), which a cancer patient's genome must satisfy in order to be included in the group under consideration. The first vector (\code{S}) contains decoded signatures, i.e. where the CFEs involving copy number alterations are represented by a genomic loci and contained cancer driver genes. The second vector (\code{ES}) contains signatures of CFEs as they are represented in the binary event matrix containing the patients genomic data used to build the CELLector searching space. Further deatils are provided in [2]. The third vector (\code{STS}) contains the percentage of cancer patients belonging to the group represented by the signatures. The fourth vector (\code{SC}) contains the number of cancer patients from the cohort belonging to the group.
 }
 \references{
 [1] Iorio, F. et al. A Landscape of Pharmacogenomic Interactions in Cancer. Cell 166, 740–754 (2016).
@@ -68,7 +68,7 @@ CSS_p <- CELLector.Build_Search_Space_Partitioned(ctumours = t(tumours_BEM),
 
 ### derive signatures from searching space
 Signatures <- CELLector.createAllSignatures_Partitioned(CSS_p$partitioned)
-data.frame(Signatures = Signatures$S,'SubType Size'=Signatures$STS)
+data.frame(Signatures = Signatures$S,'SubType Size'=Signatures$STS, 'SubType Count'=Signatures$SC)
 
 }
 % Add one or more standard keywords, see file 'KEYWORDS' in the
