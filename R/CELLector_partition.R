@@ -163,15 +163,92 @@ CELLector.createAllSignatures_Partitioned <- function(NavTab){
   signatures <- vector()
   encodedsignatures <- vector()
   subTypeSizes <- vector()
+  subTypeSizesCount <- vector()
   for (i in 1:length(NN)){
     signatures[i] <- NavTab$SignatureDecoded[i]
     encodedsignatures[i] <- NavTab$Signature[i]
     subTypeSizes[i] <- NavTab$Support[i]
+    subTypeSizesCount[i] <- NavTab$Total[i]
   }
   names(signatures) <- NN
   names(encodedsignatures) <- NN
   return(list(S = signatures, ES = encodedsignatures, STS = 100 *
-                subTypeSizes))
+                subTypeSizes, SC = subTypeSizesCount))
 
 }
+
+
+# build binary matrix based on the signature
+CELLector.buildModelMatrix_Partitioned <- function (Sigs, dataset, searchSpace){
+
+  encodedSignatures <- Sigs
+  ordataset <- dataset
+  r <- dataset[, 2]
+  COSMICids <- dataset[, 1]
+  dataset <- dataset[, 3:ncol(dataset)]
+  rownames(dataset) <- r
+  MODELS <- vector()
+  for (cc in 1:length(encodedSignatures)) {
+    solved <- CELLector.solveFormula(RULE = encodedSignatures[[cc]],
+                                     dataset = ordataset)
+    suppressWarnings(MODELS[cc] <- paste(sort(solved$PS),
+                                         collapse = ", "))
+  }
+
+  sortedModels <- MODELS
+
+  NODEidx <- which(sortedModels != "")
+  NODEidx <- NODEidx - 1  # all NULL has node id as 0
+  sortedModels <- sortedModels[which(sortedModels != "")]
+  modellist <- sortedModels
+  cls_ <- list()
+  for (i in 1:length(modellist)) {
+    cls_[[i]] <- unlist(str_split(modellist[i], ", "))
+  }
+
+  mappedCLS <- sort(unique(unlist(cls_)))
+  modelMatrix <- matrix(0, length(modellist), length(mappedCLS),
+                        dimnames = list(1:length(modellist), mappedCLS))
+  for (i in 1:length(modellist)) {
+    modelMatrix[i, cls_[[i]]] <- 1
+  }
+  rownames(modelMatrix) <- as.character(NODEidx)
+  return(modelMatrix)
+
+}
+
+# summary table
+CELLector.Summary_Projection <- function(Signatures, ModelMat){
+
+  # can also be used in hierarchical setting,
+  # but number of patients not shown in that case
+
+  if(is.null(Signatures$SC)){
+    Signatures$SC <- rep(NA, length(Signatures$STS))
+  }
+
+  df <- data.frame(Subtype = names(Signatures$ES),
+                   Signatures = Signatures$ES,
+                   Signatures_complete = Signatures$S,
+                   N_patients =  Signatures$SC,
+                   P_patients = Signatures$STS,
+                   n_CL = NA, repr_CL = NA)
+
+  id_mapped <- rownames(ModelMat)
+  id_lines <- colnames(ModelMat)
+
+  for(id_row in 1:nrow(df)){
+
+    if(!df$Subtype[id_row] %in% id_mapped){
+      df$repr_CL[id_row] <- 'lack of in vitro models'
+      df$n_CL[id_row] <- 0
+    }else{
+      id_row_model <- which(id_mapped == df$Subtype[id_row])
+      df$n_CL[id_row] <- sum(ModelMat[id_row_model, ])
+      df$repr_CL[id_row] <- paste0(id_lines[ModelMat[id_row_model, ] == 1], collapse = ',')
+    }
+  }
+  return(df)
+}
+
 
