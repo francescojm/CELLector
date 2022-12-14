@@ -197,7 +197,7 @@ In this other example, we want to recompute the cell line scores but prioritisin
 
 ```{r, fig.show='hold',fig.width=6,fig.height=6}
 ### Scoring colorectal cancer cell lines based on the searching space assembled in the previous examples
-CSscores<-CELLector.Score(NavTab = CSS$navTable,CELLlineData = CELLlineData,alfa = 0.10)
+CSscores<-CELLector.Score(NavTab = CSS$navTable,CELLlineData = CELLlineData,alpha = 0.10)
 
 ### Visualising the best 3 cell lines according to the considered searching space and criteria
 knitr::kable(CSscores[1:3,],align = 'l')
