@@ -123,8 +123,7 @@ data(CELLector.HCCancerDrivers)
 ## loading COSMIC [3] variants observed it at least two patients from [3]
 data(CELLector.RecfiltVariants)
 
-## Assembling a genomic binary event matrix (BEM) for human derived microsatellite stable diploid colorectal carcinoma cell lines,
-resected from male patients using genomic data from the Cell Model Passports [1]
+## Assembling a genomic binary event matrix (BEM) for human derived microsatellite stable diploid colorectal carcinoma cell lines, resected from male patients using genomic data from the Cell Model Passports [1]
 
 COREAD_cl_BEM <- CELLector.CELLline_buildBEM(
                   Tissue='Large Intestine',
