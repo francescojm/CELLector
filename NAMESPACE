@@ -27,6 +27,11 @@ export(CELLector.selectionVisit)
 export(CELLector.changeSScolors)
 export(CELLector.visualiseSearchingSpace)
 export(CELLector.visualiseSearchingSpace_sunBurst)
+export(CELLector.from_Hierarchical_to_Partition)
+export(CELLector.Build_Search_Space_Partitioned)
+export(CELLector.createAllSignatures_Partitioned)
+export(CELLector.buildModelMatrix_Partitioned)
+export(CELLector.Summary_Projection)
 
 exportPattern("^[[:alpha:]]+")
 
