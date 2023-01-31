@@ -1502,7 +1502,7 @@ createNode<-function(SystemStack,
 
   nsamples<-ceiling(globalSupport*nrow(transactions))
 
-  minSupport<-nsamples/nrow(currentDataset)
+  minSupport<-round(nsamples/nrow(currentDataset), digits = 6)
 
   if(minSupport<1 & sum(unlist(c(currentDataset)))>0){
 
