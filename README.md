@@ -4,7 +4,7 @@
 # CELLector: Genomics Guided Selection of Cancer in vitro models
 
 ### News: v2.0.0
-From version 2.0.0 CELLector introduces a partitioned version that is derived from the hierarchical division of the previous version. In particular, the hierarchical version identifies K recursive co-occurent signature rules. In the partitioned version, these are additionally converted into a K+1 non-overlapping groups, covering the entire sample space. 
+From version 2.0.0 CELLector introduces a partitioned search space that is derived from the hierarchical search space implemented in the previous version. In particular, the hierarchical version identifies K recursive co-occurent signature rules. In the partitioned version, these are additionally converted into a K+1 non-overlapping groups, covering the entire sample space.
 
 v1.2.0
 
